@@ -75,6 +75,8 @@ class Build
         tasks.unshift "db:mysql:rebuild"
       when "postgresql"
         tasks.unshift "db:postgresql:rebuild"
+      when "cockroachdb"
+        tasks.unshift "db:cockroachdb:rebuild"
       end
       tasks
     else

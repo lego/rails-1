@@ -19,35 +19,32 @@ def run_without_aborting(*tasks)
   abort "Errors running #{errors.join(', ')}" if errors.any?
 end
 
-desc "Run mysql2, sqlite, and postgresql tests by default"
+desc "Run cockroachdb tests by default"
 task default: :test
 
 task :package
 
-desc "Run mysql2, sqlite, and postgresql tests"
+desc "Run cockroachdb tests"
 task :test do
-  tasks = defined?(JRUBY_VERSION) ?
-    %w(test_jdbcmysql test_jdbcsqlite3 test_jdbcpostgresql) :
-    %w(test_mysql2 test_sqlite3 test_postgresql)
+  tasks = %w(test_cockroachdb)
   run_without_aborting(*tasks)
 end
 
 namespace :test do
   task :isolated do
-    tasks = defined?(JRUBY_VERSION) ?
-      %w(isolated_test_jdbcmysql isolated_test_jdbcsqlite3 isolated_test_jdbcpostgresql) :
-      %w(isolated_test_mysql2 isolated_test_sqlite3 isolated_test_postgresql)
+    tasks = %w(isolated_test_cockroachdb)
     run_without_aborting(*tasks)
   end
 end
 
-desc "Build MySQL and PostgreSQL test databases"
+desc "Build CockroachDB test databases"
 namespace :db do
-  task create: ["db:mysql:build", "db:postgresql:build"]
-  task drop: ["db:mysql:drop", "db:postgresql:drop"]
+  task create: ["db:cockroachdb:build"]
+  task drop: ["db:cockroachdb:drop"]
 end
 
-%w( mysql2 postgresql sqlite3 sqlite3_mem db2 oracle jdbcmysql jdbcpostgresql jdbcsqlite3 jdbcderby jdbch2 jdbchsqldb ).each do |adapter|
+
+%w( cockroachdb sqlite3 ).each do |adapter|
   namespace :test do
     Rake::TestTask.new(adapter => "#{adapter}:env") { |t|
       adapter_short = adapter == "db2" ? adapter : adapter[/^[a-z0-9]+/]
@@ -58,7 +55,6 @@ end
 
       t.warning = true
       t.verbose = true
-      t.ruby_opts = ["--dev"] if defined?(JRUBY_VERSION)
     }
 
     namespace :isolated do
@@ -87,53 +83,41 @@ end
   task "isolated_test_#{adapter}" => ["#{adapter}:env", "test:isolated:#{adapter}"]
 end
 
-namespace :db do
-  namespace :mysql do
-    desc "Build the MySQL test databases"
-    task :build do
-      config = ARTest.config["connections"]["mysql2"]
-      %x( mysql --user=#{config["arunit"]["username"]} --password=#{config["arunit"]["password"]} -e "create DATABASE #{config["arunit"]["database"]} DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_unicode_ci ")
-      %x( mysql --user=#{config["arunit2"]["username"]} --password=#{config["arunit2"]["password"]} -e "create DATABASE #{config["arunit2"]["database"]} DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_unicode_ci ")
-    end
-
-    desc "Drop the MySQL test databases"
-    task :drop do
-      config = ARTest.config["connections"]["mysql2"]
-      %x( mysqladmin --user=#{config["arunit"]["username"]} --password=#{config["arunit"]["password"]} -f drop #{config["arunit"]["database"]} )
-      %x( mysqladmin --user=#{config["arunit2"]["username"]} --password=#{config["arunit2"]["password"]} -f drop #{config["arunit2"]["database"]} )
-    end
-
-    desc "Rebuild the MySQL test databases"
-    task rebuild: [:drop, :build]
+# cockroach_cli_options takes a database config (found in config.yml)
+# and generates the CLI options corresponding to it.
+def cockroach_cli_options(config)
+  opts = ""
+  if config['sslmode'] == 'disable'
+    opts += "--insecure "
   end
+  return opts
+end
 
-  namespace :postgresql do
-    desc "Build the PostgreSQL test databases"
+namespace :db do
+  namespace :cockroachdb do
+    desc "Build the CockroachDB test databases"
     task :build do
-      config = ARTest.config["connections"]["postgresql"]
-      %x( createdb -E UTF8 -T template0 #{config["arunit"]["database"]} )
-      %x( createdb -E UTF8 -T template0 #{config["arunit2"]["database"]} )
+      config = ARTest.config["connections"]["cockroachdb"]
+
+      %x( cockroach sql #{cockroach_cli_options(config["arunit"])} -e "CREATE DATABASE #{config["arunit"]["database"]}" )
+      %x( cockroach sql #{cockroach_cli_options(config["arunit2"])} -e "CREATE DATABASE #{config["arunit2"]["database"]}" )
     end
 
-    desc "Drop the PostgreSQL test databases"
+    desc "Drop the CockroachDB test databases"
     task :drop do
-      config = ARTest.config["connections"]["postgresql"]
-      %x( dropdb #{config["arunit"]["database"]} )
-      %x( dropdb #{config["arunit2"]["database"]} )
+      config = ARTest.config["connections"]["cockroachdb"]
+      %x( cockroach sql #{cockroach_cli_options(config["arunit"])} -e "sql_safe_updates = true; DROP DATABASE IF EXISTS #{config["arunit"]["database"]}" )
+      %x( cockroach sql #{cockroach_cli_options(config["arunit2"])} -e "sql_safe_updates = true; DROP DATABASE IF EXISTS #{config["arunit2"]["database"]}" )
     end
 
-    desc "Rebuild the PostgreSQL test databases"
+    desc "Rebuild the CockroachDB test databases"
     task rebuild: [:drop, :build]
   end
 end
 
-task build_mysql_databases: "db:mysql:build"
-task drop_mysql_databases: "db:mysql:drop"
-task rebuild_mysql_databases: "db:mysql:rebuild"
-
-task build_postgresql_databases: "db:postgresql:build"
-task drop_postgresql_databases: "db:postgresql:drop"
-task rebuild_postgresql_databases: "db:postgresql:rebuild"
+task build_cockroachdb_databases: "db:cockroachdb:build"
+task drop_cockroachdb_databases: "db:cockroachdb:drop"
+task rebuild_cockroachdb_databases: "db:cockroachdb:rebuild"
 
 task :lines do
   load File.expand_path("../tools/line_statistics", __dir__)

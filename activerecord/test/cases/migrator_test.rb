@@ -1,3 +1,4 @@
+# FILE(BAD) -- migration table is a string and expects implicit casting
 # frozen_string_literal: true
 
 require "cases/helper"
@@ -175,6 +176,7 @@ class MigratorTest < ActiveRecord::TestCase
   end
 
   def test_migrations_status_with_schema_define_in_subdirectories
+    skip("FIXME(joey): migrations table expects implicit casting from int to string for 'version'") if current_adapter(:CockroachDBAdapter)
     path = MIGRATIONS_ROOT + "/valid_with_subdirectories"
     prev_paths = ActiveRecord::Migrator.migrations_paths
     ActiveRecord::Migrator.migrations_paths = path

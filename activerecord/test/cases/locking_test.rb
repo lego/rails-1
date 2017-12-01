@@ -1,3 +1,4 @@
+# FILE(BAD) -- we do not support FOR UPDATE or FOR SHARE NOWAIT yet. see cockroachdb/cockroach#6583
 # frozen_string_literal: true
 
 require "thread"
@@ -578,6 +579,7 @@ unless in_memory_db?
 
     # Test typical find.
     def test_sane_find_with_lock
+      skip("FIXME(joey): we do not support FOR UPDATE yet cockroachdb/cockroach#6583") if current_adapter?(:CockroachDBAdapter)
       assert_nothing_raised do
         Person.transaction do
           Person.lock.find(1)
@@ -599,6 +601,7 @@ unless in_memory_db?
     end
 
     def test_lock_does_not_raise_when_the_object_is_not_dirty
+      skip("FIXME(joey): we do not support FOR UPDATE yet cockroachdb/cockroach#6583") if current_adapter?(:CockroachDBAdapter)
       person = Person.find 1
       assert_nothing_raised do
         person.lock!
@@ -614,6 +617,7 @@ unless in_memory_db?
     end
 
     def test_with_lock_commits_transaction
+      skip("FIXME(joey): we do not support FOR UPDATE yet cockroachdb/cockroach#6583") if current_adapter?(:CockroachDBAdapter)
       person = Person.find 1
       person.with_lock do
         person.first_name = "fooman"
@@ -635,6 +639,7 @@ unless in_memory_db?
 
     if current_adapter?(:PostgreSQLAdapter)
       def test_lock_sending_custom_lock_statement
+        skip("FIXME(joey): we do not support FOR SHARE NOWAIT yet cockroachdb/cockroach#6583") if current_adapter?(:CockroachDBAdapter)
         Person.transaction do
           person = Person.find(1)
           assert_sql(/LIMIT \$?\d FOR SHARE NOWAIT/) do

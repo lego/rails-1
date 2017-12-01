@@ -18,7 +18,9 @@ ActiveRecord::Schema.define do
 
   create_table :defaults, force: true do |t|
     t.date :modified_date, default: -> { "CURRENT_DATE" }
-    t.date :modified_date_function, default: -> { "now()" }
+    # FIXME(joey): Cockroach requires an explicit type cast, otherwise now() fails.
+    # https://github.com/cockroachdb/cockroach/issues/20402
+    t.date :modified_date_function, default: -> { "now()::DATE" }
     t.date :fixed_date, default: "2004-01-01"
     t.datetime :modified_time, default: -> { "CURRENT_TIMESTAMP" }
     t.datetime :modified_time_function, default: -> { "now()" }
@@ -32,67 +34,75 @@ ActiveRecord::Schema.define do
 "
   end
 
-  create_table :postgresql_times, force: true do |t|
+  create_table :cockroachdb_times, force: true do |t|
     t.interval :time_interval
-    t.interval :scaled_time_interval, precision: 6
+    # FIXME(joey): CockroachDB does not support precision on interval.
+    # t.interval :scaled_time_interval, precision: 6
   end
 
-  create_table :postgresql_oids, force: true do |t|
+  create_table :cockroachdb_oids, force: true do |t|
     t.oid :obj_id
   end
 
-  drop_table "postgresql_timestamp_with_zones", if_exists: true
-  drop_table "postgresql_partitioned_table", if_exists: true
-  drop_table "postgresql_partitioned_table_parent", if_exists: true
+  drop_table "cockroachdb_timestamp_with_zones", if_exists: true
+  drop_table "cockroachdb_partitioned_table", if_exists: true
+  drop_table "cockroachdb_partitioned_table_parent", if_exists: true
 
   execute "DROP SEQUENCE IF EXISTS companies_nonstd_seq CASCADE"
-  execute "CREATE SEQUENCE companies_nonstd_seq START 101 OWNED BY companies.id"
+  # FIXME(joey): CockroachDB does not support sequence dependancies.
+  # https://github.com/cockroachdb/cockroach/issues/19723
+  # execute "CREATE SEQUENCE companies_nonstd_seq START 101 OWNED BY companies.id"
+  execute "CREATE SEQUENCE companies_nonstd_seq START 101"
   execute "ALTER TABLE companies ALTER COLUMN id SET DEFAULT nextval('companies_nonstd_seq')"
   execute "DROP SEQUENCE IF EXISTS companies_id_seq"
 
-  execute "DROP FUNCTION IF EXISTS partitioned_insert_trigger()"
+  # FIXME(joey): CockroachDB dos not support functions.
+  # execute "DROP FUNCTION IF EXISTS partitioned_insert_trigger()"
 
-  %w(accounts_id_seq developers_id_seq projects_id_seq topics_id_seq customers_id_seq orders_id_seq).each do |seq_name|
-    execute "SELECT setval('#{seq_name}', 100)"
-  end
+  # FIXME(joey): I am quite confused where these sequences are being created.
+  # %w(accounts_id_seq developers_id_seq projects_id_seq topics_id_seq customers_id_seq orders_id_seq).each do |seq_name|
+  #   execute "SELECT setval('#{seq_name}', 100)"
+  # end
 
   execute <<_SQL
-  CREATE TABLE postgresql_timestamp_with_zones (
+  CREATE TABLE cockroachdb_timestamp_with_zones (
     id SERIAL PRIMARY KEY,
     time TIMESTAMP WITH TIME ZONE
   );
 _SQL
 
-  begin
-    execute <<_SQL
-    CREATE TABLE postgresql_partitioned_table_parent (
-      id SERIAL PRIMARY KEY,
-      number integer
-    );
-    CREATE TABLE postgresql_partitioned_table ( )
-      INHERITS (postgresql_partitioned_table_parent);
-
-    CREATE OR REPLACE FUNCTION partitioned_insert_trigger()
-    RETURNS TRIGGER AS $$
-    BEGIN
-      INSERT INTO postgresql_partitioned_table VALUES (NEW.*);
-      RETURN NULL;
-    END;
-    $$
-    LANGUAGE plpgsql;
-
-    CREATE TRIGGER insert_partitioning_trigger
-      BEFORE INSERT ON postgresql_partitioned_table_parent
-      FOR EACH ROW EXECUTE PROCEDURE partitioned_insert_trigger();
-_SQL
-  rescue ActiveRecord::StatementInvalid => e
-    if e.message.include?('language "plpgsql" does not exist')
-      execute "CREATE LANGUAGE 'plpgsql';"
-      retry
-    else
-      raise e
-    end
-  end
+#   begin
+#     # FIXME(joey): I do not think CockroachDB supports anything similar to
+#     # this.
+#     execute <<_SQL
+#     CREATE TABLE cockroachdb_partitioned_table_parent (
+#       id SERIAL PRIMARY KEY,
+#       number integer
+#     );
+#     CREATE TABLE cockroachdb_partitioned_table ( )
+#       INHERITS (cockroachdb_partitioned_table_parent);
+# _SQL
+#     # FIXME(joey): CockroachDB does not support functions or triggers
+#     # CREATE OR REPLACE FUNCTION partitioned_insert_trigger()
+#     # RETURNS TRIGGER AS $$
+#     # BEGIN
+#     #   INSERT INTO cockroachdb_partitioned_table VALUES (NEW.*);
+#     #   RETURN NULL;
+#     # END;
+#     # $$
+#     # LANGUAGE plpgsql;
+#     #
+#     # CREATE TRIGGER insert_partitioning_trigger
+#     #   BEFORE INSERT ON cockroachdb_partitioned_table_parent
+#     #   FOR EACH ROW EXECUTE PROCEDURE partitioned_insert_trigger();
+#   rescue ActiveRecord::StatementInvalid => e
+#     if e.message.include?('language "plpgsql" does not exist')
+#       execute "CREATE LANGUAGE 'plpgsql';"
+#       retry
+#     else
+#       raise e
+#     end
+  # end
 
   # This table is to verify if the :limit option is being ignored for text and binary columns
   create_table :limitless_fields, force: true do |t|
@@ -102,7 +112,9 @@ _SQL
 
   create_table :bigint_array, force: true do |t|
     t.integer :big_int_data_points, limit: 8, array: true
-    t.decimal :decimal_array_default, array: true, default: [1.23, 3.45]
+    # FIXME(joey): For some reason ActiveRecord is throwing an error
+    # when using an Array for a default value. Needs to be investigated.
+    # t.decimal :decimal_array_default, array: true, default: [1.23, 3.45]
   end
 
   create_table :uuid_items, force: true, id: false do |t|

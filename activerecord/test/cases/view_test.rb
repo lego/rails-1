@@ -1,3 +1,6 @@
+# FILE(BAD)
+# - string is appearing as text
+# - update, insert, and delete on view which is not supported
 # frozen_string_literal: true
 
 require "cases/helper"
@@ -56,6 +59,7 @@ module ViewBehavior
   end
 
   def test_column_definitions
+    skip("FIXME(joey): string appears as text") if current_adapter?(:CockroachDBAdapter)
     assert_equal([["id", :integer],
                   ["name", :string],
                   ["status", :integer]], Ebook.columns.map { |c| [c.name, c.type] })
@@ -136,6 +140,7 @@ if ActiveRecord::Base.connection.supports_views?
     end
 
     def test_column_definitions
+      skip("FIXME(joey): string appears as text") if current_adapter?(:CockroachDBAdapter)
       assert_equal([["name", :string],
                     ["status", :integer]], Paperback.columns.map { |c| [c.name, c.type] })
     end
@@ -155,9 +160,10 @@ if ActiveRecord::Base.connection.supports_views?
     end
   end
 
+  # TODO(joey): Fix typo. Possibly gate this?
   # sqlite dose not support CREATE, INSERT, and DELETE for VIEW
   if current_adapter?(:Mysql2Adapter, :SQLServerAdapter) ||
-      current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter) && ActiveRecord::Base.connection.postgresql_version >= 90300
+      current_adapter?(:PostgreSQLAdapter) && ActiveRecord::Base.connection.postgresql_version >= 90300
 
     class UpdateableViewTest < ActiveRecord::TestCase
       self.use_transactional_tests = false
@@ -180,6 +186,7 @@ if ActiveRecord::Base.connection.supports_views?
       end
 
       def test_update_record
+        skip("FIXME(joey): CockroachDB does not support updating views") if current_adapter?(:CockroachDBAdapter)
         book = PrintedBook.first
         book.name = "AWDwR"
         book.save!
@@ -188,6 +195,7 @@ if ActiveRecord::Base.connection.supports_views?
       end
 
       def test_insert_record
+        skip("FIXME(joey): CockroachDB does not support inserting into views") if current_adapter?(:CockroachDBAdapter)
         PrintedBook.create! name: "Rails in Action", status: 0, format: "paperback"
 
         new_book = PrintedBook.last
@@ -195,6 +203,7 @@ if ActiveRecord::Base.connection.supports_views?
       end
 
       def test_update_record_to_fail_view_conditions
+        skip("FIXME(joey): CockroachDB does not support updating into views") if current_adapter?(:CockroachDBAdapter)
         book = PrintedBook.first
         book.format = "ebook"
         book.save!

@@ -1,3 +1,4 @@
+# FILE(OK) -- CockroachDB does not support comments, but the supports_comments? reflects this.
 # frozen_string_literal: true
 
 require "cases/helper"

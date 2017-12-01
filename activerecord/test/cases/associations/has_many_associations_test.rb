@@ -1,3 +1,5 @@
+# FILE(BAD) - really bad, lots of failures
+# - needs more investigations. 3 failures which are all specific to here. may be a schema definition issue
 # frozen_string_literal: true
 
 require "cases/helper"

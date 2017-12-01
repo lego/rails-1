@@ -1,3 +1,7 @@
+# FILE(OK)
+# - due to no RANGE feature
+# - due to not storing limits on types (specifically STRING)
+# - as column array: true currently is not working.
 # frozen_string_literal: true
 
 require "cases/helper"
@@ -53,7 +57,13 @@ module ActiveRecord
 
     test "overloaded properties with limit" do
       assert_equal 50, OverloadedType.type_for_attribute("overloaded_string_with_limit").limit
-      assert_equal 255, UnoverloadedType.type_for_attribute("overloaded_string_with_limit").limit
+      # NOTE(joey): CockroachDB does not have have a limit on types, so
+      # the string limit on table creation is ignored.
+      if current_adapter?(:CockroachDBAdapter)
+        assert_nil UnoverloadedType.type_for_attribute("overloaded_string_with_limit").limit
+      else
+        assert_equal 255, UnoverloadedType.type_for_attribute("overloaded_string_with_limit").limit
+      end
     end
 
     test "nonexistent attribute" do
@@ -167,6 +177,7 @@ module ActiveRecord
 
     if current_adapter?(:PostgreSQLAdapter) || current_adapter?(:CockroachDBAdapter)
       test "array types can be specified" do
+        skip("FIXME(joey): CockroachDBAdapter currently does not support array types") if current_adapter?(:CockroachDBAdapter)
         klass = Class.new(OverloadedType) do
           attribute :my_array, :string, limit: 50, array: true
           attribute :my_int_array, :integer, array: true
@@ -182,6 +193,7 @@ module ActiveRecord
       end
 
       test "range types can be specified" do
+        skip("CockroachDB does not support types, see cockroachdb/cockroach#17022") if current_adapter?(:CockroachDBAdapter)
         klass = Class.new(OverloadedType) do
           attribute :my_range, :string, limit: 50, range: true
           attribute :my_int_range, :integer, range: true

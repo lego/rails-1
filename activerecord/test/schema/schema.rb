@@ -209,7 +209,7 @@ ActiveRecord::Schema.define do
     t.index [:name, :description], length: 10
     t.index [:firm_id, :type, :rating], name: "company_index", length: { type: 10 }, order: { rating: :desc }
     t.index [:firm_id, :type], name: "company_partial_index", where: "(rating > 10)"
-    t.index :name, name: "company_name_index", using: :btree
+    t.index :name, name: "company_name_index"
     t.index "lower(name)", name: "company_expression_index" if supports_expression_index?
   end
 
@@ -443,7 +443,9 @@ ActiveRecord::Schema.define do
     t.integer :college_id
   end
 
-  add_foreign_key :lessons_students, :students, on_delete: :cascade
+  # FIXME(joey): no on_delete_cascade support
+  # add_foreign_key :lessons_students, :students, on_delete: :cascade
+  add_foreign_key :lessons_students, :students
 
   create_table :lint_models, force: true
 
@@ -863,6 +865,8 @@ ActiveRecord::Schema.define do
     else
       t.datetime :written_on
     end
+    # FIXME(joey): Time is not supported in CockroachDB 1.1.x. This
+    # needs to be a t.string if 1.1.x.
     t.time     :bonus_time
     t.date     :last_read
     # use VARCHAR2(4000) instead of CLOB datatype as CLOB data type has many limitations in

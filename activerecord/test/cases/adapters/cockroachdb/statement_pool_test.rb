@@ -1,10 +1,15 @@
+# FILE(NOT DONE)
 # frozen_string_literal: true
 
 require "cases/helper"
+require 'active_record/connection_adapters/postgresql_adapter'
 
 module ActiveRecord
   module ConnectionAdapters
-    class CockroachDBAdapter < AbstractAdapter
+    # FIXME(joey): It seems excessive that this test needs to inherit
+    # the postgres adapater. It appears that the test is a "monkeypatch"
+    # to the CockroachDBAdapter class. Why?
+    class CockroachDBAdapter < PostgreSQLAdapter
       class InactivePgConnection
         def query(*args)
           raise PG::Error

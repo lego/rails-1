@@ -1,11 +1,14 @@
+# FILE(NOT DONE)
 # frozen_string_literal: true
 
 require "cases/helper"
 require "active_record/connection_adapters/postgresql/utils"
 
+# FIXME(joey): These are postgres specific objects. We need to either
+# replicate them, or drop the test.
 class CockroachDBUtilsTest < ActiveRecord::CockroachDBTestCase
-  Name = ActiveRecord::ConnectionAdapters::CockroachDB::Name
-  include ActiveRecord::ConnectionAdapters::CockroachDB::Utils
+  Name = ActiveRecord::ConnectionAdapters::PostgreSQL::Name
+  include ActiveRecord::ConnectionAdapters::PostgreSQL::Utils
 
   def test_extract_schema_qualified_name
     {
@@ -24,7 +27,7 @@ class CockroachDBUtilsTest < ActiveRecord::CockroachDBTestCase
 end
 
 class CockroachDBNameTest < ActiveRecord::CockroachDBTestCase
-  Name = ActiveRecord::ConnectionAdapters::CockroachDB::Name
+  Name = ActiveRecord::ConnectionAdapters::PostgreSQL::Name
 
   test "represents itself as schema.name" do
     obj = Name.new("public", "articles")

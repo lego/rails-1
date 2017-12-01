@@ -1,3 +1,4 @@
+# FILE(NOT DONE)
 # frozen_string_literal: true
 
 require "cases/helper"
@@ -500,7 +501,7 @@ class SchemaForeignKeyTest < ActiveRecord::CockroachDBTestCase
   end
 end
 
-class SchemaIndexOpclassTest < ActiveRecord::PostgreSQLTestCase
+class SchemaIndexOpclassTest < ActiveRecord::CockroachDBTestCase
   include SchemaDumpingHelper
 
   setup do
@@ -532,7 +533,7 @@ class SchemaIndexOpclassTest < ActiveRecord::PostgreSQLTestCase
   end
 end
 
-class DefaultsUsingMultipleSchemasAndDomainTest < ActiveRecord::PostgreSQLTestCase
+class DefaultsUsingMultipleSchemasAndDomainTest < ActiveRecord::CockroachDBTestCase
   setup do
     @connection = ActiveRecord::Base.connection
     @connection.drop_schema "schema_1", if_exists: true

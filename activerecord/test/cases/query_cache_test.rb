@@ -1,3 +1,6 @@
+# FILE(BAD) -- only unsupported features, no failures
+# - a test uses FOR UPDATE
+# - a test uses VARCHAR(N)
 # frozen_string_literal: true
 
 require "cases/helper"
@@ -313,6 +316,7 @@ class QueryCacheTest < ActiveRecord::TestCase
   end
 
   def test_cache_is_ignored_for_locked_relations
+    skip("FIXME(joey): CockroachDB does not support FOR UPDATE") if current_adapter?(:CockroachDBAdapter)
     task = Task.find 1
 
     Task.cache do
@@ -493,6 +497,7 @@ class QueryCacheExpiryTest < ActiveRecord::TestCase
   end
 
   def test_cache_gets_cleared_after_migration
+    skip("FIXME(joey): CockroachDB does not support varchar/char limits") if current_adapter?(:CockroachDBAdapter)
     # warm the cache
     Post.find(1)
 

@@ -1,3 +1,4 @@
+# FILE(NOT DONE)
 # frozen_string_literal: true
 
 require "cases/helper"
@@ -247,7 +248,7 @@ class CockroachDBGeometricLineTest < ActiveRecord::CockroachDBTestCase
   class CockroachdbLine < ActiveRecord::Base; end
 
   setup do
-    unless ActiveRecord::Base.connection.send(:cockroachdb_version) >= 90400
+    unless ActiveRecord::Base.connection.send(:postgresql_version) >= 90400
       skip("line type is not fully implemented")
     end
     @connection = ActiveRecord::Base.connection

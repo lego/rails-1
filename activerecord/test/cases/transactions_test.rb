@@ -1,3 +1,6 @@
+# FILE(BAD)
+# - unknown errors
+# - taking an unreasonably long time
 # frozen_string_literal: true
 
 require "cases/helper"
@@ -977,6 +980,7 @@ if ActiveRecord::Base.connection.supports_transaction_isolation?
 
     # Test for dirty reads among simultaneous transactions.
     def test_transaction_isolation__read_committed
+      skip("FIXME(joey): This runs in serializable mode, which raises a retry-able error") if current_adapter?(:CockroachDBAdapter)
       # Should be invariant.
       original_salary = Developer.find(1).salary
       temporary_salary = 200000

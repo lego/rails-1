@@ -1,3 +1,4 @@
+# FILE(OK) - although READ UNCOMMITTED does not work
 # frozen_string_literal: true
 
 require "cases/helper"

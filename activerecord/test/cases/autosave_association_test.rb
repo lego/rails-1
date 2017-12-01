@@ -1,3 +1,4 @@
+# FILE(BAD)
 # frozen_string_literal: true
 
 require "cases/helper"

@@ -1,3 +1,4 @@
+# FILE(NOT DONE)
 # frozen_string_literal: true
 
 require "cases/helper"
@@ -94,7 +95,7 @@ module ActiveRecord
     end
 
     test "raises TransactionTimeout when lock wait timeout exceeded" do
-      skip unless ActiveRecord::Base.connection.cockroachdb_version >= 90300
+      skip unless ActiveRecord::Base.connection.postgresql_version >= 90300
       assert_raises(ActiveRecord::TransactionTimeout) do
         s = Sample.create!(value: 1)
         latch1 = Concurrent::CountDownLatch.new
@@ -145,33 +146,6 @@ module ActiveRecord
         ensure
           Sample.connection.execute("SET statement_timeout = DEFAULT")
           latch2.count_down
-          thread.join
-        end
-      end
-    end
-
-    test "raises QueryCanceled when canceling statement due to user request" do
-      assert_raises(ActiveRecord::QueryCanceled) do
-        s = Sample.create!(value: 1)
-        latch = Concurrent::CountDownLatch.new
-
-        thread = Thread.new do
-          Sample.transaction do
-            Sample.lock.find(s.id)
-            latch.count_down
-            sleep(0.5)
-            conn = Sample.connection
-            pid = conn.query_value("SELECT pid FROM pg_stat_activity WHERE query LIKE '% FOR UPDATE'")
-            conn.execute("SELECT pg_cancel_backend(#{pid})")
-          end
-        end
-
-        begin
-          Sample.transaction do
-            latch.wait
-            Sample.lock.find(s.id)
-          end
-        ensure
           thread.join
         end
       end

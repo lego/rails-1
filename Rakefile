@@ -25,9 +25,8 @@ task default: %w(test test:isolated)
   desc "Run #{task_name} task for all projects"
   task task_name do
     errors = []
-    FRAMEWORKS.each do |project|
-      system(%(cd #{project} && #{$0} #{task_name} --trace)) || errors << project
-    end
+    project = "activerecord"
+    system(%(cd #{project} && #{$0} #{task_name} --trace)) || errors << project
     fail("Errors in #{errors.join(', ')}") unless errors.empty?
   end
 end

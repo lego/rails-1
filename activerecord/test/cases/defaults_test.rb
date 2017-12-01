@@ -1,3 +1,4 @@
+# FILE(BAD) -- for some unknown reason, many of the defaults do not work
 # frozen_string_literal: true
 
 require "cases/helper"

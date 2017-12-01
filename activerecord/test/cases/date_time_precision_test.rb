@@ -1,3 +1,4 @@
+# FILE(OK) - file is skipped due to subsecond_precision_supported?
 # frozen_string_literal: true
 
 require "cases/helper"

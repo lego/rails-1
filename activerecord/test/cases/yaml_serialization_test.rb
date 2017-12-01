@@ -1,3 +1,5 @@
+# FILE(BAD)
+# - generates unsupported GROUP BY
 # frozen_string_literal: true
 
 require "cases/helper"
@@ -76,6 +78,7 @@ class YamlSerializationTest < ActiveRecord::TestCase
   end
 
   def test_types_of_virtual_columns_are_not_changed_on_round_trip
+      skip("FIXME(joey): CockroachDB does not support the GROUP BY generated here, see cockroachdb/cockroach#20729") if current_adapter?(:CockroachDBAdapter)
     author = Author.select("authors.*, count(posts.id) as posts_count")
       .joins(:posts)
       .group("authors.id")

@@ -49,10 +49,13 @@ end
     Rake::TestTask.new(adapter => "#{adapter}:env") { |t|
       adapter_short = adapter == "db2" ? adapter : adapter[/^[a-z0-9]+/]
       t.libs << "test"
-      t.test_files = (Dir.glob("test/cases/**/*_test.rb").reject {
-        |x| x.include?("/adapters/")
-      } + Dir.glob("test/cases/adapters/#{adapter_short}/**/*_test.rb"))
-
+      if ENV.key?("TESTFILES")
+        t.test_files = Dir.glob(ENV["TESTFILES"])
+      else
+        t.test_files = (Dir.glob("test/cases/**/*_test.rb").reject {
+          |x| x.include?("/adapters/")
+        } + Dir.glob("test/cases/adapters/#{adapter_short}/**/*_test.rb"))
+      end
       t.warning = true
       t.verbose = true
     }
@@ -78,6 +81,8 @@ end
     task(:env) { ENV["ARCONN"] = adapter }
   end
 
+  task "test_#{adapter}" => ["#{adapter}:env", "test:#{adapter}"]
+
   # Make sure the adapter test evaluates the env setting task
   task "test_#{adapter}" => ["#{adapter}:env", "test:#{adapter}"]
   task "isolated_test_#{adapter}" => ["#{adapter}:env", "test:isolated:#{adapter}"]
@@ -87,7 +92,7 @@ end
 # and generates the CLI options corresponding to it.
 def cockroach_cli_options(config)
   opts = ""
-  if config['sslmode'] == 'disable'
+  if config['requiressl'] == 'disable'
     opts += "--insecure "
   end
   return opts
@@ -106,8 +111,8 @@ namespace :db do
     desc "Drop the CockroachDB test databases"
     task :drop do
       config = ARTest.config["connections"]["cockroachdb"]
-      %x( cockroach sql #{cockroach_cli_options(config["arunit"])} -e "sql_safe_updates = true; DROP DATABASE IF EXISTS #{config["arunit"]["database"]}" )
-      %x( cockroach sql #{cockroach_cli_options(config["arunit2"])} -e "sql_safe_updates = true; DROP DATABASE IF EXISTS #{config["arunit2"]["database"]}" )
+      %x( cockroach sql #{cockroach_cli_options(config["arunit"])} -e "SET sql_safe_updates = false; DROP DATABASE IF EXISTS #{config["arunit"]["database"]}" )
+      %x( cockroach sql #{cockroach_cli_options(config["arunit2"])} -e "SET sql_safe_updates = false; DROP DATABASE IF EXISTS #{config["arunit2"]["database"]}" )
     end
 
     desc "Rebuild the CockroachDB test databases"

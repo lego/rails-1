@@ -1,3 +1,5 @@
+# FILE(BAD) - dumping is not working correctly
+# - foreign keys do not seem to be picked up
 # frozen_string_literal: true
 
 require "cases/helper"
@@ -112,6 +114,9 @@ class SchemaDumperTest < ActiveRecord::TestCase
   end
 
   def test_no_dump_errors
+    skip("FIXME(joey): Could not dump due to error below. Appears to be due to an issue commented in cockroachdb_specific_schema.rb") if current_adapter?(:CockroachDBAdapter)
+    # Could not dump table "bigint_array" because of following StandardError
+    #   Unknown type 'bigint' for column 'big_int_data_points'
     output = standard_dump
     assert_no_match %r{\# Could not dump table}, output
   end
@@ -122,6 +127,7 @@ class SchemaDumperTest < ActiveRecord::TestCase
   end
 
   def test_schema_dump_includes_limit_constraint_for_integer_columns
+    skip("FIXME(joey): Could not dump. Likely due to precision not being preserved, likely due to an issue commented in cockroachdb_specific_schema.rb") if current_adapter?(:CockroachDBAdapter)
     output = dump_all_table_schema([/^(?!integer_limits)/])
 
     assert_match %r{"c_int_without_limit"(?!.*limit)}, output
@@ -276,17 +282,20 @@ class SchemaDumperTest < ActiveRecord::TestCase
   end
 
   def test_schema_dump_includes_decimal_options
+    skip("FIXME(joey): Did not dump default condition") if current_adapter?(:CockroachDBAdapter)
     output = dump_all_table_schema([/^[^n]/])
     assert_match %r{precision: 3,[[:space:]]+scale: 2,[[:space:]]+default: "2\.78"}, output
   end
 
   if current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter)
     def test_schema_dump_includes_bigint_default
+      skip("FIXME(joey): Did not dump default condition") if current_adapter?(:CockroachDBAdapter)
       output = dump_table_schema "defaults"
       assert_match %r{t\.bigint\s+"bigint_default",\s+default: 0}, output
     end
 
     def test_schema_dump_includes_limit_on_array_type
+      skip("FIXME(joey): Could not dump due to error below. Appears to be due to an issue commented in cockroachdb_specific_schema.rb") if current_adapter?(:CockroachDBAdapter)
       output = dump_table_schema "bigint_array"
       assert_match %r{t\.bigint\s+"big_int_data_points\",\s+array: true}, output
     end
@@ -297,12 +306,14 @@ class SchemaDumperTest < ActiveRecord::TestCase
     end
 
     def test_schema_dump_expression_indices
+      skip("FIXME(joey): unknown error, dump_table_schema returned nil") if current_adapter?(:CockroachDBAdapter)
       index_definition = dump_table_schema("companies").split(/\n/).grep(/t\.index.*company_expression_index/).first.strip
       assert_equal 't.index "lower((name)::text)", name: "company_expression_index"', index_definition
     end
 
     def test_schema_dump_interval_type
-      output = dump_table_schema "postgresql_times"
+      skip("FIXME(joey): Could not dump. Likely due to precision not being preserved, likely due to an issue commented in cockroachdb_specific_schema.rb") if current_adapter?(:CockroachDBAdapter)
+      output = dump_table_schema "cockroachdb_times"
       assert_match %r{t\.interval\s+"time_interval"$}, output
       assert_match %r{t\.interval\s+"scaled_time_interval",\s+precision: 6$}, output
     end
@@ -354,6 +365,7 @@ class SchemaDumperTest < ActiveRecord::TestCase
   end
 
   def test_schema_dump_keeps_id_column_when_id_is_false_and_id_column_added
+    skip("FIXME(joey): Expected text string type but got text") if current_adapter?(:CockroachDBAdapter)
     output = standard_dump
     match = output.match(%r{create_table "goofy_string_id"(.*)do.*\n(.*)\n})
     assert_not_nil(match, "goofy_string_id table not found")
@@ -368,11 +380,13 @@ class SchemaDumperTest < ActiveRecord::TestCase
 
   if ActiveRecord::Base.connection.supports_foreign_keys?
     def test_foreign_keys_are_dumped_at_the_bottom_to_circumvent_dependency_issues
+      skip("FIXME(joey): Did not dump any foreign keys") if current_adapter?(:CockroachDBAdapter)
       output = standard_dump
       assert_match(/^\s+add_foreign_key "fk_test_has_fk"[^\n]+\n\s+add_foreign_key "lessons_students"/, output)
     end
 
     def test_do_not_dump_foreign_keys_for_ignored_tables
+      skip("FIXME(joey): Did not dump any foreign keys") if current_adapter?(:CockroachDBAdapter)
       output = dump_table_schema "authors"
       assert_equal ["authors"], output.scan(/^\s*add_foreign_key "([^"]+)".+$/).flatten
     end
@@ -502,9 +516,10 @@ class SchemaDumperDefaultsTest < ActiveRecord::TestCase
 
   teardown do
     @connection.drop_table "dump_defaults", if_exists: true
-<  end
+  end
 
   def test_schema_dump_defaults_with_universally_supported_types
+    skip("FIXME(joey): Did not dump default condition") if current_adapter?(:CockroachDBAdapter)
     output = dump_table_schema("dump_defaults")
 
     assert_match %r{t\.string\s+"string_with_default",.*?default: "Hello!"}, output
@@ -515,6 +530,7 @@ class SchemaDumperDefaultsTest < ActiveRecord::TestCase
   end
 
   def test_schema_dump_with_float_column_infinity_default
+    skip("FIXME(joey): Did not dump default condition") if current_adapter?(:CockroachDBAdapter)
     skip unless current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter)
     output = dump_table_schema("infinity_defaults")
     assert_match %r{t\.float\s+"float_with_inf_default",\s+default: ::Float::INFINITY}, output

@@ -27,6 +27,7 @@ module ActiveRecord
           version_options = connection.internal_string_options_for_primary_key
 
           connection.create_table(table_name, id: false) do |t|
+            # FIXME(joey): This needs to implicitly cast.
             t.string :version, version_options
           end
         end

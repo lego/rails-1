@@ -28,6 +28,8 @@ ARTest.connect
 # Quote "type" if it's a reserved word for the current connection.
 QUOTED_TYPE = ActiveRecord::Base.connection.quote_column_name("type")
 
+# FIXME(joey): CockroachDB passes for PostgreSQL. This may be desirable
+# to prevent in the future.
 def current_adapter?(*types)
   types.any? do |type|
     ActiveRecord::ConnectionAdapters.const_defined?(type) &&

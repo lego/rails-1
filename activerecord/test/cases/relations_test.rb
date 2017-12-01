@@ -1,3 +1,4 @@
+# FILE(OK) -- only failures are by unsupport GROUP BY stuff
 # frozen_string_literal: true
 
 require "cases/helper"
@@ -1529,6 +1530,7 @@ class RelationTest < ActiveRecord::TestCase
   end
 
   def test_having_with_binds_for_both_where_and_having
+    skip("FIXME(joey): CockroachDB does not support the GROUP BY generated here, see cockroachdb/cockroach#20729") if current_adapter?(:CockroachDBAdapter)
     post = Post.first
     having_then_where = Post.having(id: post.id).where(title: post.title).group(:id)
     where_then_having = Post.where(title: post.title).having(id: post.id).group(:id)
@@ -1538,6 +1540,7 @@ class RelationTest < ActiveRecord::TestCase
   end
 
   def test_multiple_where_and_having_clauses
+    skip("FIXME(joey): CockroachDB does not support the GROUP BY generated here, see cockroachdb/cockroach#20729") if current_adapter?(:CockroachDBAdapter)
     post = Post.first
     having_then_where = Post.having(id: post.id).where(title: post.title)
       .having(id: post.id).where(title: post.title).group(:id)

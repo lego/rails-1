@@ -1,3 +1,5 @@
+# FILE(BAD)
+# - expects implicit INT to STRING cast in a manual SQL statement
 # frozen_string_literal: true
 
 require "cases/helper"
@@ -75,6 +77,7 @@ class LeftOuterJoinAssociationTest < ActiveRecord::TestCase
   end
 
   def test_does_not_override_select
+    skip("FIXME(joey): this test expects implicit casting of INT to STRING") if current_adapter?(:CockroachDBAdapter)
     authors = Author.select("authors.name, #{%{(authors.author_address_id || ' ' || authors.author_address_extra_id) as addr_id}}").left_outer_joins(:posts)
     assert authors.any?
     assert authors.first.respond_to?(:addr_id)

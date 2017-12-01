@@ -1,3 +1,4 @@
+# FILE(NOT DONE)
 # frozen_string_literal: true
 
 require "cases/helper"
@@ -159,7 +160,7 @@ module ActiveRecord
       # Sanity check.
       assert @connection.active?
 
-      if @connection.send(:cockroachdb_version) >= 90200
+      if @connection.send(:postgresql_version) >= 90200
         secondary_connection = ActiveRecord::Base.connection_pool.checkout
         secondary_connection.query("select pg_terminate_backend(#{original_connection_pid.first.first})")
         ActiveRecord::Base.connection_pool.checkin(secondary_connection)

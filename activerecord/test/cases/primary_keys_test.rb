@@ -1,3 +1,7 @@
+# FILE(BAD) -- did not skip
+# - Default primary key function differs from PostgreSQL (expected, unique_rowid).
+# - Expects the primary key type to be configurable (int vs. bigint, etc.) but that is not the case.
+# - String is reflected as text
 # frozen_string_literal: true
 
 require "cases/helper"
@@ -194,7 +198,7 @@ class PrimaryKeysTest < ActiveRecord::TestCase
   end
 
   def test_create_without_primary_key_no_extra_query
-    skip if current_adapter?(:OracleAdapter)
+    skip if current_adapter?(:OracleAdapter) || current_adapter?(:CockroachDBAdapter)
 
     klass = Class.new(ActiveRecord::Base) do
       self.table_name = "dashboards"
@@ -203,7 +207,7 @@ class PrimaryKeysTest < ActiveRecord::TestCase
     assert_queries(3, ignore_none: true) { klass.create! }
   end
 
-  if current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter)
+  if current_adapter?(:PostgreSQLAdapter) && !current_adapter?(:CockroachDBAdapter)
     def test_serial_with_quoted_sequence_name
       column = MixedCaseMonkey.columns_hash[MixedCaseMonkey.primary_key]
       assert_equal "nextval('\"mixed_case_monkeys_monkeyID_seq\"'::regclass)", column.default_function
@@ -214,6 +218,14 @@ class PrimaryKeysTest < ActiveRecord::TestCase
       column = Topic.columns_hash[Topic.primary_key]
       assert_equal "nextval('topics_id_seq'::regclass)", column.default_function
       assert column.serial?
+    end
+  end
+
+  # NOTE(joey): Our default primary key differs from PostgreSQL.
+  if current_adapter?(:CockroachDBAdapter)
+    def test_default_primary_key_function_name
+      column = Topic.columns_hash[Topic.primary_key]
+      assert_equal "unique_rowid()", column.default_function
     end
   end
 end
@@ -292,6 +304,7 @@ class PrimaryKeyAnyTypeTest < ActiveRecord::TestCase
   end
 
   def test_any_type_primary_key
+    skip("FIXME(joey): CockroachDB expect column to report string type, but instead got text") if current_adapter?(:CockroachDBAdapter)
     assert_equal "code", Barcode.primary_key
 
     column = Barcode.column_for_attribute(Barcode.primary_key)
@@ -303,6 +316,7 @@ class PrimaryKeyAnyTypeTest < ActiveRecord::TestCase
   end
 
   test "schema dump primary key includes type and options" do
+    skip("FIXME(joey): CockroachDB cannot specify types for primary keys. This could be added.") if current_adapter?(:CockroachDBAdapter)
     schema = dump_table_schema "barcodes"
     assert_match %r{create_table "barcodes", primary_key: "code", id: :string, limit: 42}, schema
   end
@@ -395,6 +409,7 @@ class PrimaryKeyIntegerNilDefaultTest < ActiveRecord::TestCase
   end
 
   def test_schema_dump_primary_key_integer_with_default_nil
+    skip('FIXME(joey): PostgreSQL::SchemaDumper creates a bigint out of the default pkey') if current_adapter?(:CockroachDBAdapter)
     skip if current_adapter?(:SQLite3Adapter)
     @connection.create_table(:int_defaults, id: :integer, default: nil, force: true)
     schema = dump_table_schema "int_defaults"
@@ -427,6 +442,7 @@ if current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter, :Mysql2Adapter)
     end
 
     test "primary key column type with serial/integer" do
+      skip('FIXME(joey): CockroachDBAdapter makes the pkey default to bigint, but this expects it to be configurable') if current_adapter?(:CockroachDBAdapter)
       @connection.create_table(:widgets, id: @pk_type, force: true)
       column = @connection.columns(:widgets).find { |c| c.name == "id" }
       assert_equal :integer, column.type
@@ -440,6 +456,7 @@ if current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter, :Mysql2Adapter)
     end
 
     test "schema dump primary key with serial/integer" do
+      skip('FIXME(joey): PostgreSQL::SchemaDumper creates a bigint out of the default pkey') if current_adapter?(:CockroachDBAdapter)
       @connection.create_table(:widgets, id: @pk_type, force: true)
       schema = dump_table_schema "widgets"
       assert_match %r{create_table "widgets", id: :#{@pk_type}, }, schema

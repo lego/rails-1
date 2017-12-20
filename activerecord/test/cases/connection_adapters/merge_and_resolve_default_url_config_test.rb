@@ -29,7 +29,7 @@ module ActiveRecord
         ENV["DATABASE_URL"] = "postgres://localhost/foo"
         config   = { "not_production" => {  "adapter" => "not_postgres", "database" => "not_foo" } }
         actual   = resolve_spec(:default_env, config)
-        expected = { "adapter" => "postgresql", "database" => "foo", "host" => "localhost", "name" => "default_env" }
+        expected = { "adapter" => "cockroachdb", "database" => "foo", "host" => "localhost", "name" => "default_env" }
         assert_equal expected, actual
       end
 
@@ -39,7 +39,7 @@ module ActiveRecord
 
         config   = { "not_production" => { "adapter" => "not_postgres", "database" => "not_foo" } }
         actual   = resolve_spec(:foo, config)
-        expected = { "adapter" => "postgresql", "database" => "foo", "host" => "localhost", "name" => "foo" }
+        expected = { "adapter" => "cockroachdb", "database" => "foo", "host" => "localhost", "name" => "foo" }
         assert_equal expected, actual
       end
 
@@ -49,7 +49,7 @@ module ActiveRecord
 
         config   = { "not_production" => { "adapter" => "not_postgres", "database" => "not_foo" } }
         actual   = resolve_spec(:foo, config)
-        expected = { "adapter" => "postgresql", "database" => "foo", "host" => "localhost", "name" => "foo" }
+        expected = { "adapter" => "cockroachdb", "database" => "foo", "host" => "localhost", "name" => "foo" }
         assert_equal expected, actual
       end
 
@@ -73,7 +73,7 @@ module ActiveRecord
         ENV["DATABASE_URL"] = "not-postgres://not-localhost/not_foo"
         config   = { "production" => {  "adapter" => "also_not_postgres", "database" => "also_not_foo" } }
         actual   = resolve_spec("postgres://localhost/foo", config)
-        expected = { "adapter" => "postgresql", "database" => "foo", "host" => "localhost" }
+        expected = { "adapter" => "cockroachdb", "database" => "foo", "host" => "localhost" }
         assert_equal expected, actual
       end
 
@@ -87,7 +87,7 @@ module ActiveRecord
         ENV["DATABASE_URL"] = "postgres://localhost/foo"
         config      = { "not_default_env" => {  "adapter" => "not_postgres", "database" => "not_foo" } }
         actual      = resolve_config(config)
-        expect_prod = { "adapter" => "postgresql", "database" => "foo", "host" => "localhost" }
+        expect_prod = { "adapter" => "cockroachdb", "database" => "foo", "host" => "localhost" }
         assert_equal expect_prod, actual["default_env"]
       end
 
@@ -103,7 +103,7 @@ module ActiveRecord
         config   = { "default_env" => "postgres://localhost/foo" }
         actual   = resolve_config(config)
         expected = { "default_env" =>
-                     { "adapter"  => "postgresql",
+                     { "adapter"  => "cockroachdb",
                        "database" => "foo",
                        "host"     => "localhost"
                       }
@@ -115,7 +115,7 @@ module ActiveRecord
         config   = { "default_env" => { "url" => "postgres://localhost/foo" } }
         actual   = resolve_config(config)
         expected = { "default_env" =>
-                     { "adapter"  => "postgresql",
+                     { "adapter"  => "cockroachdb",
                        "database" => "foo",
                        "host"     => "localhost"
                       }
@@ -140,7 +140,7 @@ module ActiveRecord
 
         config   = {}
         actual   = resolve_config(config)
-        expected = { "adapter"  => "postgresql",
+        expected = { "adapter"  => "cockroachdb",
                      "database" => "foo",
                      "host"     => "localhost" }
         assert_equal expected, actual["default_env"]
@@ -159,7 +159,7 @@ module ActiveRecord
 
         config   = {}
         actual   = resolve_config(config)
-        expected = { "adapter"  => "postgresql",
+        expected = { "adapter"  => "cockroachdb",
                      "database" => "foo",
                      "host"     => "localhost" }
 
@@ -181,7 +181,7 @@ module ActiveRecord
 
         config   = {}
         actual   = resolve_config(config)
-        expected = { "adapter"  => "postgresql",
+        expected = { "adapter"  => "cockroachdb",
                      "database" => "foo",
                      "host"     => "localhost" }
 
@@ -202,7 +202,7 @@ module ActiveRecord
 
         config   = {}
         actual   = resolve_config(config)
-        expected = { "adapter"  => "postgresql",
+        expected = { "adapter"  => "cockroachdb",
                      "database" => "foo",
                      "host"     => "::1",
                      "port"     => 5454 }
@@ -215,7 +215,7 @@ module ActiveRecord
         config   = { "default_env" => { "url" => "postgres://localhost/foo" } }
         actual   = resolve_config(config)
         expected = { "default_env" =>
-                    { "adapter" => "postgresql",
+                    { "adapter" => "cockroachdb",
                        "database" => "foo",
                        "host"     => "localhost"
                       }
@@ -229,7 +229,7 @@ module ActiveRecord
         config   = { "default_env" => { "pool" => "5" } }
         actual   = resolve_config(config)
         expected = { "default_env" =>
-                     { "adapter"  => "postgresql",
+                     { "adapter"  => "cockroachdb",
                        "database" => "foo",
                        "host"     => "localhost",
                        "pool"     => "5"
@@ -244,7 +244,7 @@ module ActiveRecord
         config   = { "default_env" => { "adapter" => "NOT-POSTGRES", "database" => "NOT-FOO", "pool" => "5" } }
         actual   = resolve_config(config)
         expected = { "default_env" =>
-                     { "adapter"  => "postgresql",
+                     { "adapter"  => "cockroachdb",
                        "database" => "foo",
                        "host"     => "localhost",
                        "pool"     => "5"

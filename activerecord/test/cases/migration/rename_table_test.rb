@@ -72,7 +72,7 @@ module ActiveRecord
         end
       end
 
-      if current_adapter?(:PostgreSQLAdapter)
+      if current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter)
         def test_rename_table_for_postgresql_should_also_rename_default_sequence
           rename_table :test_models, :octopi
 

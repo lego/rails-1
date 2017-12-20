@@ -14,7 +14,8 @@ module ActiveRecord
 
     ##
     # PostgreSQL does not support null bytes in strings
-    unless current_adapter?(:PostgreSQLAdapter) ||
+    # FIXME(joey): Investigate if this is true. This was the case for PostgreSQL.
+    unless current_adapter?(:PostgreSQLAdapter) || current_adapter?(:CockroachDBAdapter) ||
         (current_adapter?(:SQLite3Adapter) && !ActiveRecord::Base.connection.prepared_statements)
       def test_update_prepared_statement
         b = Book.create(name: "my \x00 book")
@@ -284,7 +285,7 @@ module ActiveRecord
       assert_equal "special_db_type", @connection.type_to_sql(:special_db_type)
     end
 
-    unless current_adapter?(:PostgreSQLAdapter)
+    unless current_adapter?(:PostgreSQLAdapter) || current_adapter?(:CockroachDBAdapter)
       def test_log_invalid_encoding
         error = assert_raises RuntimeError do
           @connection.send :log, "SELECT 'ы' FROM DUAL" do

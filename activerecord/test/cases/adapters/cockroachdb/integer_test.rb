@@ -3,7 +3,7 @@
 require "cases/helper"
 require "active_support/core_ext/numeric/bytes"
 
-class PostgresqlIntegerTest < ActiveRecord::PostgreSQLTestCase
+class CockroachdbIntegerTest < ActiveRecord::CockroachDBTestCase
   class PgInteger < ActiveRecord::Base
   end
 

@@ -4,25 +4,25 @@ require "cases/helper"
 require "models/developer"
 require "models/topic"
 
-class PostgresqlTimestampTest < ActiveRecord::PostgreSQLTestCase
-  class PostgresqlTimestampWithZone < ActiveRecord::Base; end
+class CockroachdbTimestampTest < ActiveRecord::CockroachDBTestCase
+  class CockroachdbTimestampWithZone < ActiveRecord::Base; end
 
   self.use_transactional_tests = false
 
   setup do
     @connection = ActiveRecord::Base.connection
-    @connection.execute("INSERT INTO postgresql_timestamp_with_zones (id, time) VALUES (1, '2010-01-01 10:00:00-1')")
+    @connection.execute("INSERT INTO cockroachdb_timestamp_with_zones (id, time) VALUES (1, '2010-01-01 10:00:00-1')")
   end
 
   teardown do
-    PostgresqlTimestampWithZone.delete_all
+    CockroachdbTimestampWithZone.delete_all
   end
 
   def test_timestamp_with_zone_values_with_rails_time_zone_support
     with_timezone_config default: :utc, aware_attributes: true do
       @connection.reconnect!
 
-      timestamp = PostgresqlTimestampWithZone.find(1)
+      timestamp = CockroachdbTimestampWithZone.find(1)
       assert_equal Time.utc(2010, 1, 1, 11, 0, 0), timestamp.time
       assert_instance_of Time, timestamp.time
     end
@@ -36,7 +36,7 @@ class PostgresqlTimestampTest < ActiveRecord::PostgreSQLTestCase
       # make sure to use a non-UTC time zone
       @connection.execute("SET time zone 'America/Jamaica'", "SCHEMA")
 
-      timestamp = PostgresqlTimestampWithZone.find(1)
+      timestamp = CockroachdbTimestampWithZone.find(1)
       assert_equal Time.utc(2010, 1, 1, 11, 0, 0), timestamp.time
       assert_instance_of Time, timestamp.time
     end
@@ -45,7 +45,7 @@ class PostgresqlTimestampTest < ActiveRecord::PostgreSQLTestCase
   end
 end
 
-class PostgresqlTimestampFixtureTest < ActiveRecord::PostgreSQLTestCase
+class CockroachdbTimestampFixtureTest < ActiveRecord::CockroachDBTestCase
   fixtures :topics
 
   def test_group_by_date

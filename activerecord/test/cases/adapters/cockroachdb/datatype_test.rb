@@ -3,30 +3,30 @@
 require "cases/helper"
 require "support/ddl_helper"
 
-class PostgresqlTime < ActiveRecord::Base
+class CockroachdbTime < ActiveRecord::Base
 end
 
-class PostgresqlOid < ActiveRecord::Base
+class CockroachdbOid < ActiveRecord::Base
 end
 
-class PostgresqlLtree < ActiveRecord::Base
+class CockroachdbLtree < ActiveRecord::Base
 end
 
-class PostgresqlDataTypeTest < ActiveRecord::PostgreSQLTestCase
+class CockroachdbDataTypeTest < ActiveRecord::CockroachDBTestCase
   self.use_transactional_tests = false
 
   def setup
     @connection = ActiveRecord::Base.connection
 
-    @connection.execute("INSERT INTO postgresql_times (id, time_interval, scaled_time_interval) VALUES (1, '1 year 2 days ago', '3 weeks ago')")
-    @first_time = PostgresqlTime.find(1)
+    @connection.execute("INSERT INTO cockroachdb_times (id, time_interval, scaled_time_interval) VALUES (1, '1 year 2 days ago', '3 weeks ago')")
+    @first_time = CockroachdbTime.find(1)
 
-    @connection.execute("INSERT INTO postgresql_oids (id, obj_id) VALUES (1, 1234)")
-    @first_oid = PostgresqlOid.find(1)
+    @connection.execute("INSERT INTO cockroachdb_oids (id, obj_id) VALUES (1, 1234)")
+    @first_oid = CockroachdbOid.find(1)
   end
 
   teardown do
-    [PostgresqlTime, PostgresqlOid].each(&:delete_all)
+    [CockroachdbTime, CockroachdbOid].each(&:delete_all)
   end
 
   def test_data_type_of_time_types
@@ -70,7 +70,7 @@ class PostgresqlDataTypeTest < ActiveRecord::PostgreSQLTestCase
   end
 end
 
-class PostgresqlInternalDataTypeTest < ActiveRecord::PostgreSQLTestCase
+class CockroachdbInternalDataTypeTest < ActiveRecord::CockroachDBTestCase
   include DdlHelper
 
   setup do

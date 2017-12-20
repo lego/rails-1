@@ -45,7 +45,7 @@ module ActiveRecord
         assert_nil TestModel.columns_hash["description"].limit
       end
 
-      if current_adapter?(:Mysql2Adapter, :PostgreSQLAdapter)
+      if current_adapter?(:Mysql2Adapter, :PostgreSQLAdapter, :CockroachDBAdapter)
         def test_unabstracted_database_dependent_types
           add_column :test_models, :intelligence_quotient, :smallint
           TestModel.reset_column_information
@@ -174,11 +174,11 @@ module ActiveRecord
         end
       end
 
-      if current_adapter?(:Mysql2Adapter, :PostgreSQLAdapter)
+      if current_adapter?(:Mysql2Adapter, :PostgreSQLAdapter, :CockroachDBAdapter)
         def test_out_of_range_limit_should_raise
           assert_raise(ActiveRecordError) { add_column :test_models, :integer_too_big, :integer, limit: 10 }
 
-          unless current_adapter?(:PostgreSQLAdapter)
+          unless current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter)
             assert_raise(ActiveRecordError) { add_column :test_models, :text_too_big, :text, limit: 0xfffffffff }
           end
         end

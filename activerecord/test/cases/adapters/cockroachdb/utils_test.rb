@@ -3,9 +3,9 @@
 require "cases/helper"
 require "active_record/connection_adapters/postgresql/utils"
 
-class PostgreSQLUtilsTest < ActiveRecord::PostgreSQLTestCase
-  Name = ActiveRecord::ConnectionAdapters::PostgreSQL::Name
-  include ActiveRecord::ConnectionAdapters::PostgreSQL::Utils
+class CockroachDBUtilsTest < ActiveRecord::CockroachDBTestCase
+  Name = ActiveRecord::ConnectionAdapters::CockroachDB::Name
+  include ActiveRecord::ConnectionAdapters::CockroachDB::Utils
 
   def test_extract_schema_qualified_name
     {
@@ -23,8 +23,8 @@ class PostgreSQLUtilsTest < ActiveRecord::PostgreSQLTestCase
   end
 end
 
-class PostgreSQLNameTest < ActiveRecord::PostgreSQLTestCase
-  Name = ActiveRecord::ConnectionAdapters::PostgreSQL::Name
+class CockroachDBNameTest < ActiveRecord::CockroachDBTestCase
+  Name = ActiveRecord::ConnectionAdapters::CockroachDB::Name
 
   test "represents itself as schema.name" do
     obj = Name.new("public", "articles")

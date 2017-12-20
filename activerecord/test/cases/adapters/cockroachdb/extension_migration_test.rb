@@ -2,7 +2,7 @@
 
 require "cases/helper"
 
-class PostgresqlExtensionMigrationTest < ActiveRecord::PostgreSQLTestCase
+class CockroachdbExtensionMigrationTest < ActiveRecord::CockroachDBTestCase
   self.use_transactional_tests = false
 
   class EnableHstore < ActiveRecord::Migration::Current

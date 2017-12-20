@@ -157,7 +157,7 @@ if ActiveRecord::Base.connection.supports_views?
 
   # sqlite dose not support CREATE, INSERT, and DELETE for VIEW
   if current_adapter?(:Mysql2Adapter, :SQLServerAdapter) ||
-      current_adapter?(:PostgreSQLAdapter) && ActiveRecord::Base.connection.postgresql_version >= 90300
+      current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter) && ActiveRecord::Base.connection.postgresql_version >= 90300
 
     class UpdateableViewTest < ActiveRecord::TestCase
       self.use_transactional_tests = false
@@ -204,7 +204,7 @@ if ActiveRecord::Base.connection.supports_views?
         end
       end
     end
-  end # end of `if current_adapter?(:Mysql2Adapter, :PostgreSQLAdapter, :SQLServerAdapter)`
+  end # end of `if current_adapter?(:Mysql2Adapter, :PostgreSQLAdapter, :CockroachDBAdapter, :SQLServerAdapter)`
 end # end of `if ActiveRecord::Base.connection.supports_views?`
 
 if ActiveRecord::Base.connection.respond_to?(:supports_materialized_views?) &&

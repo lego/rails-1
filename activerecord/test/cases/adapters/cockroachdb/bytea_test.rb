@@ -3,7 +3,7 @@
 require "cases/helper"
 require "support/schema_dumping_helper"
 
-class PostgresqlByteaTest < ActiveRecord::PostgreSQLTestCase
+class CockroachdbByteaTest < ActiveRecord::CockroachDBTestCase
   include SchemaDumpingHelper
 
   class ByteaDataType < ActiveRecord::Base
@@ -29,7 +29,7 @@ class PostgresqlByteaTest < ActiveRecord::PostgreSQLTestCase
   end
 
   def test_column
-    assert @column.is_a?(ActiveRecord::ConnectionAdapters::PostgreSQLColumn)
+    assert @column.is_a?(ActiveRecord::ConnectionAdapters::CockroachDBColumn)
     assert_equal :binary, @column.type
   end
 

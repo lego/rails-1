@@ -4,7 +4,7 @@ require "cases/helper"
 require "models/computer"
 require "models/developer"
 
-class PreparedStatementsDisabledTest < ActiveRecord::PostgreSQLTestCase
+class PreparedStatementsDisabledTest < ActiveRecord::CockroachDBTestCase
   fixtures :developers
 
   def setup

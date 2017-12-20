@@ -3,32 +3,32 @@
 require "cases/helper"
 require "support/schema_dumping_helper"
 
-class PostgresqlMoneyTest < ActiveRecord::PostgreSQLTestCase
+class CockroachdbMoneyTest < ActiveRecord::CockroachDBTestCase
   include SchemaDumpingHelper
 
-  class PostgresqlMoney < ActiveRecord::Base; end
+  class CockroachdbMoney < ActiveRecord::Base; end
 
   setup do
     @connection = ActiveRecord::Base.connection
     @connection.execute("set lc_monetary = 'C'")
-    @connection.create_table("postgresql_moneys", force: true) do |t|
+    @connection.create_table("cockroachdb_moneys", force: true) do |t|
       t.money "wealth"
       t.money "depth", default: "150.55"
     end
   end
 
   teardown do
-    @connection.drop_table "postgresql_moneys", if_exists: true
+    @connection.drop_table "cockroachdb_moneys", if_exists: true
   end
 
   def test_column
-    column = PostgresqlMoney.columns_hash["wealth"]
+    column = CockroachdbMoney.columns_hash["wealth"]
     assert_equal :money, column.type
     assert_equal "money", column.sql_type
     assert_equal 2, column.scale
     assert_not column.array?
 
-    type = PostgresqlMoney.type_for_attribute("wealth")
+    type = CockroachdbMoney.type_for_attribute("wealth")
     assert_not type.binary?
   end
 
@@ -38,17 +38,17 @@ class PostgresqlMoneyTest < ActiveRecord::PostgreSQLTestCase
   end
 
   def test_money_values
-    @connection.execute("INSERT INTO postgresql_moneys (id, wealth) VALUES (1, '567.89'::money)")
-    @connection.execute("INSERT INTO postgresql_moneys (id, wealth) VALUES (2, '-567.89'::money)")
+    @connection.execute("INSERT INTO cockroachdb_moneys (id, wealth) VALUES (1, '567.89'::money)")
+    @connection.execute("INSERT INTO cockroachdb_moneys (id, wealth) VALUES (2, '-567.89'::money)")
 
-    first_money = PostgresqlMoney.find(1)
-    second_money = PostgresqlMoney.find(2)
+    first_money = CockroachdbMoney.find(1)
+    second_money = CockroachdbMoney.find(2)
     assert_equal 567.89, first_money.wealth
     assert_equal(-567.89, second_money.wealth)
   end
 
   def test_money_type_cast
-    type = PostgresqlMoney.type_for_attribute("wealth")
+    type = CockroachdbMoney.type_for_attribute("wealth")
     assert_equal(12345678.12, type.cast("$12,345,678.12".dup))
     assert_equal(12345678.12, type.cast("$12.345.678,12".dup))
     assert_equal(-1.15, type.cast("-$1.15".dup))
@@ -56,13 +56,13 @@ class PostgresqlMoneyTest < ActiveRecord::PostgreSQLTestCase
   end
 
   def test_schema_dumping
-    output = dump_table_schema("postgresql_moneys")
+    output = dump_table_schema("cockroachdb_moneys")
     assert_match %r{t\.money\s+"wealth",\s+scale: 2$}, output
     assert_match %r{t\.money\s+"depth",\s+scale: 2,\s+default: "150\.55"$}, output
   end
 
   def test_create_and_update_money
-    money = PostgresqlMoney.create(wealth: "987.65".dup)
+    money = CockroachdbMoney.create(wealth: "987.65".dup)
     assert_equal 987.65, money.wealth
 
     new_value = BigDecimal("123.45")
@@ -73,24 +73,24 @@ class PostgresqlMoneyTest < ActiveRecord::PostgreSQLTestCase
   end
 
   def test_update_all_with_money_string
-    money = PostgresqlMoney.create!
-    PostgresqlMoney.update_all(wealth: "987.65")
+    money = CockroachdbMoney.create!
+    CockroachdbMoney.update_all(wealth: "987.65")
     money.reload
 
     assert_equal 987.65, money.wealth
   end
 
   def test_update_all_with_money_big_decimal
-    money = PostgresqlMoney.create!
-    PostgresqlMoney.update_all(wealth: "123.45".to_d)
+    money = CockroachdbMoney.create!
+    CockroachdbMoney.update_all(wealth: "123.45".to_d)
     money.reload
 
     assert_equal 123.45, money.wealth
   end
 
   def test_update_all_with_money_numeric
-    money = PostgresqlMoney.create!
-    PostgresqlMoney.update_all(wealth: 123.45)
+    money = CockroachdbMoney.create!
+    CockroachdbMoney.update_all(wealth: 123.45)
     money.reload
 
     assert_equal 123.45, money.wealth

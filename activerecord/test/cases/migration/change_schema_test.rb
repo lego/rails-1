@@ -76,7 +76,7 @@ module ActiveRecord
         assert_equal "hello", five.default unless mysql
       end
 
-      if current_adapter?(:PostgreSQLAdapter)
+      if current_adapter?(:PostgreSQLAdapter) || current_adapter?(:CockroachDBAdapter)
         def test_add_column_with_array
           connection.create_table :testings
           connection.add_column :testings, :foo, :string, array: true
@@ -138,7 +138,7 @@ module ActiveRecord
         four    = columns.detect { |c| c.name == "four_int"    }
         eight   = columns.detect { |c| c.name == "eight_int"   }
 
-        if current_adapter?(:PostgreSQLAdapter)
+        if current_adapter?(:PostgreSQLAdapter) || current_adapter?(:CockroachDBAdapter)
           assert_equal "integer", default.sql_type
           assert_equal "smallint", one.sql_type
           assert_equal "integer", four.sql_type
@@ -268,7 +268,7 @@ module ActiveRecord
 
         assert_equal :datetime, column.type
 
-        if current_adapter?(:PostgreSQLAdapter)
+        if current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter)
           assert_equal "timestamp without time zone", column.sql_type
         elsif current_adapter?(:Mysql2Adapter)
           assert_equal "timestamp", column.sql_type

@@ -126,7 +126,7 @@ class SchemaDumperTest < ActiveRecord::TestCase
 
     assert_match %r{"c_int_without_limit"(?!.*limit)}, output
 
-    if current_adapter?(:PostgreSQLAdapter)
+    if current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter)
       assert_match %r{c_int_1.*limit: 2}, output
       assert_match %r{c_int_2.*limit: 2}, output
 
@@ -192,7 +192,7 @@ class SchemaDumperTest < ActiveRecord::TestCase
 
   def test_schema_dumps_partial_indices
     index_definition = dump_table_schema("companies").split(/\n/).grep(/t\.index.*company_partial_index/).first.strip
-    if current_adapter?(:PostgreSQLAdapter, :SQLite3Adapter) && ActiveRecord::Base.connection.supports_partial_index?
+    if current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter, :SQLite3Adapter) && ActiveRecord::Base.connection.supports_partial_index?
       assert_equal 't.index ["firm_id", "type"], name: "company_partial_index", where: "(rating > 10)"', index_definition
     else
       assert_equal 't.index ["firm_id", "type"], name: "company_partial_index"', index_definition
@@ -280,7 +280,7 @@ class SchemaDumperTest < ActiveRecord::TestCase
     assert_match %r{precision: 3,[[:space:]]+scale: 2,[[:space:]]+default: "2\.78"}, output
   end
 
-  if current_adapter?(:PostgreSQLAdapter)
+  if current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter)
     def test_schema_dump_includes_bigint_default
       output = dump_table_schema "defaults"
       assert_match %r{t\.bigint\s+"bigint_default",\s+default: 0}, output
@@ -492,7 +492,7 @@ class SchemaDumperDefaultsTest < ActiveRecord::TestCase
       t.decimal  :decimal_with_default,  default: "1234567890.0123456789", precision: 20, scale: 10
     end
 
-    if current_adapter?(:PostgreSQLAdapter)
+    if current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter)
       @connection.create_table :infinity_defaults, force: true do |t|
         t.float    :float_with_inf_default,    default: Float::INFINITY
         t.float    :float_with_nan_default,    default: Float::NAN
@@ -502,7 +502,7 @@ class SchemaDumperDefaultsTest < ActiveRecord::TestCase
 
   teardown do
     @connection.drop_table "dump_defaults", if_exists: true
-  end
+<  end
 
   def test_schema_dump_defaults_with_universally_supported_types
     output = dump_table_schema("dump_defaults")
@@ -515,7 +515,7 @@ class SchemaDumperDefaultsTest < ActiveRecord::TestCase
   end
 
   def test_schema_dump_with_float_column_infinity_default
-    skip unless current_adapter?(:PostgreSQLAdapter)
+    skip unless current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter)
     output = dump_table_schema("infinity_defaults")
     assert_match %r{t\.float\s+"float_with_inf_default",\s+default: ::Float::INFINITY}, output
     assert_match %r{t\.float\s+"float_with_nan_default",\s+default: ::Float::NAN}, output

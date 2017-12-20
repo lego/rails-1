@@ -6,7 +6,7 @@ require "support/connection_helper"
 
 module ActiveRecord
   module ConnectionAdapters
-    class PostgreSQLAdapterTest < ActiveRecord::PostgreSQLTestCase
+    class CockroachDBAdapterTest < ActiveRecord::CockroachDBTestCase
       self.use_transactional_tests = false
       include DdlHelper
       include ConnectionHelper
@@ -18,7 +18,7 @@ module ActiveRecord
       def test_bad_connection
         assert_raise ActiveRecord::NoDatabaseError do
           configuration = ActiveRecord::Base.configurations["arunit"].merge(database: "should_not_exist-cinco-dog-db")
-          connection = ActiveRecord::Base.postgresql_connection(configuration)
+          connection = ActiveRecord::Base.cockroachdb_connection(configuration)
           connection.exec_query("SELECT 1")
         end
       end
@@ -47,29 +47,29 @@ module ActiveRecord
 
       def test_exec_insert_with_returning_disabled
         connection = connection_without_insert_returning
-        result = connection.exec_insert("insert into postgresql_partitioned_table_parent (number) VALUES (1)", nil, [], "id", "postgresql_partitioned_table_parent_id_seq")
-        expect = connection.query("select max(id) from postgresql_partitioned_table_parent").first.first
+        result = connection.exec_insert("insert into cockroachdb_partitioned_table_parent (number) VALUES (1)", nil, [], "id", "cockroachdb_partitioned_table_parent_id_seq")
+        expect = connection.query("select max(id) from cockroachdb_partitioned_table_parent").first.first
         assert_equal expect.to_i, result.rows.first.first
       end
 
       def test_exec_insert_with_returning_disabled_and_no_sequence_name_given
         connection = connection_without_insert_returning
-        result = connection.exec_insert("insert into postgresql_partitioned_table_parent (number) VALUES (1)", nil, [], "id")
-        expect = connection.query("select max(id) from postgresql_partitioned_table_parent").first.first
+        result = connection.exec_insert("insert into cockroachdb_partitioned_table_parent (number) VALUES (1)", nil, [], "id")
+        expect = connection.query("select max(id) from cockroachdb_partitioned_table_parent").first.first
         assert_equal expect.to_i, result.rows.first.first
       end
 
       def test_exec_insert_default_values_with_returning_disabled_and_no_sequence_name_given
         connection = connection_without_insert_returning
-        result = connection.exec_insert("insert into postgresql_partitioned_table_parent DEFAULT VALUES", nil, [], "id")
-        expect = connection.query("select max(id) from postgresql_partitioned_table_parent").first.first
+        result = connection.exec_insert("insert into cockroachdb_partitioned_table_parent DEFAULT VALUES", nil, [], "id")
+        expect = connection.query("select max(id) from cockroachdb_partitioned_table_parent").first.first
         assert_equal expect.to_i, result.rows.first.first
       end
 
       def test_exec_insert_default_values_quoted_schema_with_returning_disabled_and_no_sequence_name_given
         connection = connection_without_insert_returning
-        result = connection.exec_insert('insert into "public"."postgresql_partitioned_table_parent" DEFAULT VALUES', nil, [], "id")
-        expect = connection.query("select max(id) from postgresql_partitioned_table_parent").first.first
+        result = connection.exec_insert('insert into "public"."cockroachdb_partitioned_table_parent" DEFAULT VALUES', nil, [], "id")
+        expect = connection.query("select max(id) from cockroachdb_partitioned_table_parent").first.first
         assert_equal expect.to_i, result.rows.first.first
       end
 
@@ -165,7 +165,7 @@ module ActiveRecord
         )
 
         seq = @connection.pk_and_sequence_for("ex").last
-        assert_equal PostgreSQL::Name.new("public", "ex_id_seq"), seq
+        assert_equal CockroachDB::Name.new("public", "ex_id_seq"), seq
 
         @connection.exec_query(
           "DELETE FROM pg_depend WHERE objid = 'ex2_id_seq'::regclass AND refobjid = 'ex'::regclass AND deptype = 'a'"
@@ -248,12 +248,12 @@ module ActiveRecord
 
       def test_index_with_opclass
         with_example_table do
-          @connection.add_index "ex", "data", opclass: "varchar_pattern_ops"
-          index = @connection.indexes("ex").find { |idx| idx.name == "index_ex_on_data" }
-          assert_equal ["data"], index.columns
+          @connection.add_index "ex", "data varchar_pattern_ops"
+          index = @connection.indexes("ex").find { |idx| idx.name == "index_ex_on_data_varchar_pattern_ops" }
+          assert_equal "data varchar_pattern_ops", index.columns
 
-          @connection.remove_index "ex", "data"
-          assert_not @connection.indexes("ex").find { |idx| idx.name == "index_ex_on_data" }
+          @connection.remove_index "ex", "data varchar_pattern_ops"
+          assert_not @connection.indexes("ex").find { |idx| idx.name == "index_ex_on_data_varchar_pattern_ops" }
         end
       end
 
@@ -319,7 +319,7 @@ module ActiveRecord
       def test_reload_type_map_for_newly_defined_types
         @connection.execute "CREATE TYPE feeling AS ENUM ('good', 'bad')"
         result = @connection.select_all "SELECT 'good'::feeling"
-        assert_instance_of(PostgreSQLAdapter::OID::Enum,
+        assert_instance_of(CockroachDBAdapter::OID::Enum,
                            result.column_types["feeling"])
       ensure
         @connection.execute "DROP TYPE IF EXISTS feeling"
@@ -383,7 +383,7 @@ module ActiveRecord
         end
 
         def connection_without_insert_returning
-          ActiveRecord::Base.postgresql_connection(ActiveRecord::Base.configurations["arunit"].merge(insert_returning: false))
+          ActiveRecord::Base.cockroachdb_connection(ActiveRecord::Base.configurations["arunit"].merge(insert_returning: false))
         end
     end
   end

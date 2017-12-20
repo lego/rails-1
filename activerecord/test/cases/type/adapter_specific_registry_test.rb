@@ -30,19 +30,19 @@ module ActiveRecord
     test "filtering by adapter" do
       registry = Type::AdapterSpecificRegistry.new
       registry.register(:foo, String, adapter: :sqlite3)
-      registry.register(:foo, Array, adapter: :postgresql)
+      registry.register(:foo, Array, adapter: :cockroachdb)
 
       assert_equal "", registry.lookup(:foo, adapter: :sqlite3)
-      assert_equal [], registry.lookup(:foo, adapter: :postgresql)
+      assert_equal [], registry.lookup(:foo, adapter: :cockroachdb)
     end
 
     test "an error is raised if both a generic and adapter specific type match" do
       registry = Type::AdapterSpecificRegistry.new
       registry.register(:foo, String)
-      registry.register(:foo, Array, adapter: :postgresql)
+      registry.register(:foo, Array, adapter: :cockroachdb)
 
       assert_raises TypeConflictError do
-        registry.lookup(:foo, adapter: :postgresql)
+        registry.lookup(:foo, adapter: :cockroachdb)
       end
       assert_equal "", registry.lookup(:foo, adapter: :sqlite3)
     end
@@ -50,18 +50,18 @@ module ActiveRecord
     test "a generic type can explicitly override an adapter specific type" do
       registry = Type::AdapterSpecificRegistry.new
       registry.register(:foo, String, override: true)
-      registry.register(:foo, Array, adapter: :postgresql)
+      registry.register(:foo, Array, adapter: :cockroachdb)
 
-      assert_equal "", registry.lookup(:foo, adapter: :postgresql)
+      assert_equal "", registry.lookup(:foo, adapter: :cockroachdb)
       assert_equal "", registry.lookup(:foo, adapter: :sqlite3)
     end
 
     test "a generic type can explicitly allow an adapter type to be used instead" do
       registry = Type::AdapterSpecificRegistry.new
       registry.register(:foo, String, override: false)
-      registry.register(:foo, Array, adapter: :postgresql)
+      registry.register(:foo, Array, adapter: :cockroachdb)
 
-      assert_equal [], registry.lookup(:foo, adapter: :postgresql)
+      assert_equal [], registry.lookup(:foo, adapter: :cockroachdb)
       assert_equal "", registry.lookup(:foo, adapter: :sqlite3)
     end
 
@@ -83,7 +83,7 @@ module ActiveRecord
       assert_equal type.new, registry.lookup(:foo)
       assert_equal type.new(:ordered_arg), registry.lookup(:foo, :ordered_arg)
       assert_equal type.new(keyword: :arg), registry.lookup(:foo, keyword: :arg)
-      assert_equal type.new(keyword: :arg), registry.lookup(:foo, keyword: :arg, adapter: :postgresql)
+      assert_equal type.new(keyword: :arg), registry.lookup(:foo, keyword: :arg, adapter: :cockroachdb)
     end
 
     test "registering a modifier" do
@@ -120,11 +120,11 @@ module ActiveRecord
       type = Struct.new(:args)
       registry = Type::AdapterSpecificRegistry.new
       registry.register(:foo, type)
-      registry.add_modifier({ array: true }, decoration, adapter: :postgresql)
+      registry.add_modifier({ array: true }, decoration, adapter: :cockroachdb)
 
       assert_equal(
         decoration.new(type.new(keyword: :arg)),
-        registry.lookup(:foo, array: true, adapter: :postgresql, keyword: :arg)
+        registry.lookup(:foo, array: true, adapter: :cockroachdb, keyword: :arg)
       )
       assert_equal(
         type.new(array: true),

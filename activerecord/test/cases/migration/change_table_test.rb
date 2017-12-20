@@ -132,7 +132,7 @@ module ActiveRecord
         end
       end
 
-      if current_adapter?(:PostgreSQLAdapter)
+      if current_adapter?(:PostgreSQLAdapter) || current_adapter?(:CockroachDBAdapter)
         def test_json_creates_json_column
           with_change_table do |t|
             @connection.expect :add_column, nil, [:delete_me, :foo, :json, {}]

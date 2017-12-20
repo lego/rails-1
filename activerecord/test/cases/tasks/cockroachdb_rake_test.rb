@@ -3,13 +3,13 @@
 require "cases/helper"
 require "active_record/tasks/database_tasks"
 
-if current_adapter?(:PostgreSQLAdapter)
+if current_adapter?(:CockroachDBAdapter)
   module ActiveRecord
-    class PostgreSQLDBCreateTest < ActiveRecord::TestCase
+    class CockroachDBDBCreateTest < ActiveRecord::TestCase
       def setup
         @connection    = stub(create_database: true)
         @configuration = {
-          "adapter"  => "postgresql",
+          "adapter"  => "cockroachdb",
           "database" => "my-app-db"
         }
 
@@ -24,9 +24,9 @@ if current_adapter?(:PostgreSQLAdapter)
         $stdout, $stderr = @original_stdout, @original_stderr
       end
 
-      def test_establishes_connection_to_postgresql_database
+      def test_establishes_connection_to_cockroachdb_database
         ActiveRecord::Base.expects(:establish_connection).with(
-          "adapter"            => "postgresql",
+          "adapter"            => "cockroachdb",
           "database"           => "postgres",
           "schema_search_path" => "public"
         )
@@ -90,11 +90,11 @@ if current_adapter?(:PostgreSQLAdapter)
       end
     end
 
-    class PostgreSQLDBDropTest < ActiveRecord::TestCase
+    class CockroachDBDBDropTest < ActiveRecord::TestCase
       def setup
         @connection    = stub(drop_database: true)
         @configuration = {
-          "adapter"  => "postgresql",
+          "adapter"  => "cockroachdb",
           "database" => "my-app-db"
         }
 
@@ -109,9 +109,9 @@ if current_adapter?(:PostgreSQLAdapter)
         $stdout, $stderr = @original_stdout, @original_stderr
       end
 
-      def test_establishes_connection_to_postgresql_database
+      def test_establishes_connection_to_cockroachdb_database
         ActiveRecord::Base.expects(:establish_connection).with(
-          "adapter"            => "postgresql",
+          "adapter"            => "cockroachdb",
           "database"           => "postgres",
           "schema_search_path" => "public"
         )
@@ -132,11 +132,11 @@ if current_adapter?(:PostgreSQLAdapter)
       end
     end
 
-    class PostgreSQLPurgeTest < ActiveRecord::TestCase
+    class CockroachDBPurgeTest < ActiveRecord::TestCase
       def setup
         @connection    = stub(create_database: true, drop_database: true)
         @configuration = {
-          "adapter"  => "postgresql",
+          "adapter"  => "cockroachdb",
           "database" => "my-app-db"
         }
 
@@ -151,9 +151,9 @@ if current_adapter?(:PostgreSQLAdapter)
         ActiveRecord::Tasks::DatabaseTasks.purge @configuration
       end
 
-      def test_establishes_connection_to_postgresql_database
+      def test_establishes_connection_to_cockroachdb_database
         ActiveRecord::Base.expects(:establish_connection).with(
-          "adapter"            => "postgresql",
+          "adapter"            => "cockroachdb",
           "database"           => "postgres",
           "schema_search_path" => "public"
         )
@@ -181,11 +181,11 @@ if current_adapter?(:PostgreSQLAdapter)
       end
     end
 
-    class PostgreSQLDBCharsetTest < ActiveRecord::TestCase
+    class CockroachDBDBCharsetTest < ActiveRecord::TestCase
       def setup
         @connection    = stub(create_database: true)
         @configuration = {
-          "adapter"  => "postgresql",
+          "adapter"  => "cockroachdb",
           "database" => "my-app-db"
         }
 
@@ -199,11 +199,11 @@ if current_adapter?(:PostgreSQLAdapter)
       end
     end
 
-    class PostgreSQLDBCollationTest < ActiveRecord::TestCase
+    class CockroachDBDBCollationTest < ActiveRecord::TestCase
       def setup
         @connection    = stub(create_database: true)
         @configuration = {
-          "adapter"  => "postgresql",
+          "adapter"  => "cockroachdb",
           "database" => "my-app-db"
         }
 
@@ -217,11 +217,11 @@ if current_adapter?(:PostgreSQLAdapter)
       end
     end
 
-    class PostgreSQLStructureDumpTest < ActiveRecord::TestCase
+    class CockroachDBStructureDumpTest < ActiveRecord::TestCase
       def setup
         @connection    = stub(schema_search_path: nil, structure_dump: true)
         @configuration = {
-          "adapter"  => "postgresql",
+          "adapter"  => "cockroachdb",
           "database" => "my-app-db"
         }
         @filename = "/tmp/awesome-file.sql"
@@ -322,11 +322,11 @@ if current_adapter?(:PostgreSQLAdapter)
         end
     end
 
-    class PostgreSQLStructureLoadTest < ActiveRecord::TestCase
+    class CockroachDBStructureLoadTest < ActiveRecord::TestCase
       def setup
         @connection    = stub
         @configuration = {
-          "adapter"  => "postgresql",
+          "adapter"  => "cockroachdb",
           "database" => "my-app-db"
         }
 

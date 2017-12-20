@@ -4,18 +4,18 @@ require "cases/helper"
 require "support/connection_helper"
 
 if ActiveRecord::Base.connection.respond_to?(:supports_ranges?) && ActiveRecord::Base.connection.supports_ranges?
-  class PostgresqlRange < ActiveRecord::Base
-    self.table_name = "postgresql_ranges"
+  class CockroachdbRange < ActiveRecord::Base
+    self.table_name = "cockroachdb_ranges"
     self.time_zone_aware_types += [:tsrange, :tstzrange]
   end
 
-  class PostgresqlRangeTest < ActiveRecord::PostgreSQLTestCase
+  class CockroachdbRangeTest < ActiveRecord::CockroachDBTestCase
     self.use_transactional_tests = false
     include ConnectionHelper
     include InTimeZone
 
     def setup
-      @connection = PostgresqlRange.connection
+      @connection = CockroachdbRange.connection
       begin
         @connection.transaction do
           @connection.execute <<_SQL
@@ -25,7 +25,7 @@ if ActiveRecord::Base.connection.respond_to?(:supports_ranges?) && ActiveRecord:
             );
 _SQL
 
-          @connection.create_table("postgresql_ranges") do |t|
+          @connection.create_table("cockroachdb_ranges") do |t|
             t.daterange :date_range
             t.numrange :num_range
             t.tsrange :ts_range
@@ -34,9 +34,9 @@ _SQL
             t.int8range :int8_range
           end
 
-          @connection.add_column "postgresql_ranges", "float_range", "floatrange"
+          @connection.add_column "cockroachdb_ranges", "float_range", "floatrange"
         end
-        PostgresqlRange.reset_column_information
+        CockroachdbRange.reset_column_information
       rescue ActiveRecord::StatementInvalid
         skip "do not test on PG without range"
       end
@@ -86,16 +86,16 @@ _SQL
                    int8_range: "[10, 10)",
                    float_range: "[0.5, 0.5)")
 
-      @new_range = PostgresqlRange.new
-      @first_range = PostgresqlRange.find(101)
-      @second_range = PostgresqlRange.find(102)
-      @third_range = PostgresqlRange.find(103)
-      @fourth_range = PostgresqlRange.find(104)
-      @empty_range = PostgresqlRange.find(105)
+      @new_range = CockroachdbRange.new
+      @first_range = CockroachdbRange.find(101)
+      @second_range = CockroachdbRange.find(102)
+      @third_range = CockroachdbRange.find(103)
+      @fourth_range = CockroachdbRange.find(104)
+      @empty_range = CockroachdbRange.find(105)
     end
 
     teardown do
-      @connection.drop_table "postgresql_ranges", if_exists: true
+      @connection.drop_table "cockroachdb_ranges", if_exists: true
       @connection.execute "DROP TYPE IF EXISTS floatrange"
       reset_connection
     end
@@ -168,11 +168,11 @@ _SQL
       tz = "Pacific Time (US & Canada)"
 
       in_time_zone tz do
-        PostgresqlRange.reset_column_information
+        CockroachdbRange.reset_column_information
         time_string = Time.current.to_s
         time = Time.zone.parse(time_string)
 
-        record = PostgresqlRange.new(tstz_range: time_string..time_string)
+        record = CockroachdbRange.new(tstz_range: time_string..time_string)
         assert_equal time..time, record.tstz_range
         assert_equal ActiveSupport::TimeZone[tz], record.tstz_range.begin.time_zone
 
@@ -216,11 +216,11 @@ _SQL
       tz = "Pacific Time (US & Canada)"
 
       in_time_zone tz do
-        PostgresqlRange.reset_column_information
+        CockroachdbRange.reset_column_information
         time_string = Time.current.to_s
         time = Time.zone.parse(time_string)
 
-        record = PostgresqlRange.new(ts_range: time_string..time_string)
+        record = CockroachdbRange.new(ts_range: time_string..time_string)
         assert_equal time..time, record.ts_range
         assert_equal ActiveSupport::TimeZone[tz], record.ts_range.begin.time_zone
 
@@ -264,12 +264,12 @@ _SQL
       tz = "Pacific Time (US & Canada)"
 
       in_time_zone tz do
-        PostgresqlRange.reset_column_information
+        CockroachdbRange.reset_column_information
         time_string = "2017-09-26 07:30:59.132451 -0700"
         time = Time.zone.parse(time_string)
         assert time.usec > 0
 
-        record = PostgresqlRange.new(ts_range: time_string..time_string)
+        record = CockroachdbRange.new(ts_range: time_string..time_string)
         assert_equal time..time, record.ts_range
         assert_equal ActiveSupport::TimeZone[tz], record.ts_range.begin.time_zone
         assert_equal time.usec, record.ts_range.begin.usec
@@ -326,35 +326,35 @@ _SQL
     end
 
     def test_exclude_beginning_for_subtypes_without_succ_method_is_not_supported
-      assert_raises(ArgumentError) { PostgresqlRange.create!(num_range: "(0.1, 0.2]") }
-      assert_raises(ArgumentError) { PostgresqlRange.create!(float_range: "(0.5, 0.7]") }
-      assert_raises(ArgumentError) { PostgresqlRange.create!(int4_range: "(1, 10]") }
-      assert_raises(ArgumentError) { PostgresqlRange.create!(int8_range: "(10, 100]") }
-      assert_raises(ArgumentError) { PostgresqlRange.create!(date_range: "(''2012-01-02'', ''2012-01-04'']") }
-      assert_raises(ArgumentError) { PostgresqlRange.create!(ts_range: "(''2010-01-01 14:30'', ''2011-01-01 14:30'']") }
-      assert_raises(ArgumentError) { PostgresqlRange.create!(tstz_range: "(''2010-01-01 14:30:00+05'', ''2011-01-01 14:30:00-03'']") }
+      assert_raises(ArgumentError) { CockroachdbRange.create!(num_range: "(0.1, 0.2]") }
+      assert_raises(ArgumentError) { CockroachdbRange.create!(float_range: "(0.5, 0.7]") }
+      assert_raises(ArgumentError) { CockroachdbRange.create!(int4_range: "(1, 10]") }
+      assert_raises(ArgumentError) { CockroachdbRange.create!(int8_range: "(10, 100]") }
+      assert_raises(ArgumentError) { CockroachdbRange.create!(date_range: "(''2012-01-02'', ''2012-01-04'']") }
+      assert_raises(ArgumentError) { CockroachdbRange.create!(ts_range: "(''2010-01-01 14:30'', ''2011-01-01 14:30'']") }
+      assert_raises(ArgumentError) { CockroachdbRange.create!(tstz_range: "(''2010-01-01 14:30:00+05'', ''2011-01-01 14:30:00-03'']") }
     end
 
     def test_where_by_attribute_with_range
       range = 1..100
-      record = PostgresqlRange.create!(int4_range: range)
-      assert_equal record, PostgresqlRange.where(int4_range: range).take
+      record = CockroachdbRange.create!(int4_range: range)
+      assert_equal record, CockroachdbRange.where(int4_range: range).take
     end
 
     def test_update_all_with_ranges
-      PostgresqlRange.create!
+      CockroachdbRange.create!
 
-      PostgresqlRange.update_all(int8_range: 1..100)
+      CockroachdbRange.update_all(int8_range: 1..100)
 
-      assert_equal 1...101, PostgresqlRange.first.int8_range
+      assert_equal 1...101, CockroachdbRange.first.int8_range
     end
 
     def test_ranges_correctly_escape_input
-      range = "-1,2]'; DROP TABLE postgresql_ranges; --".."a"
-      PostgresqlRange.update_all(int8_range: range)
+      range = "-1,2]'; DROP TABLE cockroachdb_ranges; --".."a"
+      CockroachdbRange.update_all(int8_range: range)
 
       assert_nothing_raised do
-        PostgresqlRange.first
+        CockroachdbRange.first
       end
     end
 
@@ -377,7 +377,7 @@ _SQL
 
       def insert_range(values)
         @connection.execute <<-SQL
-          INSERT INTO postgresql_ranges (
+          INSERT INTO cockroachdb_ranges (
             id,
             date_range,
             num_range,

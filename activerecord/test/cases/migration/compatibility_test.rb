@@ -216,7 +216,7 @@ module LegacyPrimaryKeyTestCases
     assert_match %r{create_table "legacy_primary_keys", id: :integer, default: nil}, schema
   end
 
-  if current_adapter?(:Mysql2Adapter, :PostgreSQLAdapter)
+  if current_adapter?(:Mysql2Adapter, :PostgreSQLAdapter, :CockroachDBAdapter)
     def test_legacy_primary_key_in_create_table_should_be_integer
       @migration = Class.new(migration_class) {
         def change

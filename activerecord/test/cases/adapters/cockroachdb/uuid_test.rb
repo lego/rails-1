@@ -3,7 +3,7 @@
 require "cases/helper"
 require "support/schema_dumping_helper"
 
-module PostgresqlUUIDHelper
+module CockroachdbUUIDHelper
   def connection
     @connection ||= ActiveRecord::Base.connection
   end
@@ -21,8 +21,8 @@ module PostgresqlUUIDHelper
   end
 end
 
-class PostgresqlUUIDTest < ActiveRecord::PostgreSQLTestCase
-  include PostgresqlUUIDHelper
+class CockroachdbUUIDTest < ActiveRecord::CockroachDBTestCase
+  include CockroachdbUUIDHelper
   include SchemaDumpingHelper
 
   class UUIDType < ActiveRecord::Base
@@ -182,8 +182,8 @@ class PostgresqlUUIDTest < ActiveRecord::PostgreSQLTestCase
   end
 end
 
-class PostgresqlUUIDGenerationTest < ActiveRecord::PostgreSQLTestCase
-  include PostgresqlUUIDHelper
+class CockroachdbUUIDGenerationTest < ActiveRecord::CockroachDBTestCase
+  include CockroachdbUUIDHelper
   include SchemaDumpingHelper
 
   class UUID < ActiveRecord::Base
@@ -196,7 +196,7 @@ class PostgresqlUUIDGenerationTest < ActiveRecord::PostgreSQLTestCase
       t.uuid "other_uuid", default: "uuid_generate_v4()"
     end
 
-    # Create custom PostgreSQL function to generate UUIDs
+    # Create custom CockroachDB function to generate UUIDs
     # to test dumping tables which columns have defaults with custom functions
     connection.execute <<-SQL
     CREATE OR REPLACE FUNCTION my_uuid_generator() RETURNS uuid
@@ -285,8 +285,8 @@ class PostgresqlUUIDGenerationTest < ActiveRecord::PostgreSQLTestCase
   end
 end
 
-class PostgresqlUUIDTestNilDefault < ActiveRecord::PostgreSQLTestCase
-  include PostgresqlUUIDHelper
+class CockroachdbUUIDTestNilDefault < ActiveRecord::CockroachDBTestCase
+  include CockroachdbUUIDHelper
   include SchemaDumpingHelper
 
   setup do
@@ -333,8 +333,8 @@ class PostgresqlUUIDTestNilDefault < ActiveRecord::PostgreSQLTestCase
   end
 end
 
-class PostgresqlUUIDTestInverseOf < ActiveRecord::PostgreSQLTestCase
-  include PostgresqlUUIDHelper
+class CockroachdbUUIDTestInverseOf < ActiveRecord::CockroachDBTestCase
+  include CockroachdbUUIDHelper
 
   class UuidPost < ActiveRecord::Base
     self.table_name = "pg_uuid_posts"

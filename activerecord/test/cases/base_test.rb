@@ -75,6 +75,7 @@ class BasicsTest < ActiveRecord::TestCase
       "SQLite3Adapter"    => '"',
       "Mysql2Adapter"     => "`",
       "PostgreSQLAdapter" => '"',
+      "CockroachDBAdapter" => '"',
       "OracleAdapter"     => '"',
       "FbAdapter"         => '"'
     }.fetch(classname) {
@@ -647,7 +648,7 @@ class BasicsTest < ActiveRecord::TestCase
     assert_equal "たこ焼き仮面", weird.なまえ
   end
 
-  unless current_adapter?(:PostgreSQLAdapter)
+  unless current_adapter?(:PostgreSQLAdapter) || current_adapter?(:CockroachDBAdapter)
     def test_respect_internal_encoding
       old_default_internal = Encoding.default_internal
       silence_warnings { Encoding.default_internal = "EUC-JP" }
@@ -897,7 +898,7 @@ class BasicsTest < ActiveRecord::TestCase
   end
 
   # TODO: extend defaults tests to other databases!
-  if current_adapter?(:PostgreSQLAdapter)
+  if current_adapter?(:PostgreSQLAdapter) || current_adapter?(:CockroachDBAdapter)
     def test_default
       with_timezone_config default: :local do
         default = Default.new

@@ -4,7 +4,7 @@ require "cases/helper"
 require "support/connection_helper"
 
 module ActiveRecord
-  class PostgresqlConnectionTest < ActiveRecord::PostgreSQLTestCase
+  class CockroachdbConnectionTest < ActiveRecord::CockroachDBTestCase
     include ConnectionHelper
 
     class NonExistentTable < ActiveRecord::Base
@@ -145,26 +145,26 @@ module ActiveRecord
       end
     end
 
-    # Must have PostgreSQL >= 9.2, or with_manual_interventions set to
+    # Must have CockroachDB >= 9.2, or with_manual_interventions set to
     # true for this test to run.
     #
-    # When prompted, restart the PostgreSQL server with the
+    # When prompted, restart the CockroachDB server with the
     # "-m fast" option or kill the individual connection assuming
     # you know the incantation to do that.
-    # To restart PostgreSQL 9.1 on OS X, installed via MacPorts, ...
-    # sudo su postgres -c "pg_ctl restart -D /opt/local/var/db/postgresql91/defaultdb/ -m fast"
+    # To restart CockroachDB 9.1 on OS X, installed via MacPorts, ...
+    # sudo su postgres -c "pg_ctl restart -D /opt/local/var/db/cockroachdb91/defaultdb/ -m fast"
     def test_reconnection_after_actual_disconnection_with_verify
       original_connection_pid = @connection.query("select pg_backend_pid()")
 
       # Sanity check.
       assert @connection.active?
 
-      if @connection.send(:postgresql_version) >= 90200
+      if @connection.send(:cockroachdb_version) >= 90200
         secondary_connection = ActiveRecord::Base.connection_pool.checkout
         secondary_connection.query("select pg_terminate_backend(#{original_connection_pid.first.first})")
         ActiveRecord::Base.connection_pool.checkin(secondary_connection)
       elsif ARTest.config["with_manual_interventions"]
-        puts "Kill the connection now (e.g. by restarting the PostgreSQL " \
+        puts "Kill the connection now (e.g. by restarting the CockroachDB " \
           'server with the "-m fast" option) and then press enter.'
         $stdin.gets
       else

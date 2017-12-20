@@ -586,6 +586,7 @@ unless in_memory_db?
     end
 
     # PostgreSQL protests SELECT ... FOR UPDATE on an outer join.
+    # FIXME(joey): Investiage if this is true. It was for PostgreSQL.
     unless current_adapter?(:PostgreSQLAdapter)
       # Test locked eager find.
       def test_eager_find_with_lock

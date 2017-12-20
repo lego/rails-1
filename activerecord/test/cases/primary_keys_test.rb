@@ -203,7 +203,7 @@ class PrimaryKeysTest < ActiveRecord::TestCase
     assert_queries(3, ignore_none: true) { klass.create! }
   end
 
-  if current_adapter?(:PostgreSQLAdapter)
+  if current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter)
     def test_serial_with_quoted_sequence_name
       column = MixedCaseMonkey.columns_hash[MixedCaseMonkey.primary_key]
       assert_equal "nextval('\"mixed_case_monkeys_monkeyID_seq\"'::regclass)", column.default_function
@@ -408,7 +408,7 @@ class PrimaryKeyIntegerNilDefaultTest < ActiveRecord::TestCase
   end
 end
 
-if current_adapter?(:PostgreSQLAdapter, :Mysql2Adapter)
+if current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter, :Mysql2Adapter)
   class PrimaryKeyIntegerTest < ActiveRecord::TestCase
     include SchemaDumpingHelper
 
@@ -419,7 +419,7 @@ if current_adapter?(:PostgreSQLAdapter, :Mysql2Adapter)
 
     setup do
       @connection = ActiveRecord::Base.connection
-      @pk_type = current_adapter?(:PostgreSQLAdapter) ? :serial : :integer
+      @pk_type = current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter) ? :serial : :integer
     end
 
     teardown do

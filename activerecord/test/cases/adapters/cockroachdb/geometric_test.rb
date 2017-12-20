@@ -4,11 +4,11 @@ require "cases/helper"
 require "support/connection_helper"
 require "support/schema_dumping_helper"
 
-class PostgresqlPointTest < ActiveRecord::PostgreSQLTestCase
+class CockroachdbPointTest < ActiveRecord::CockroachDBTestCase
   include ConnectionHelper
   include SchemaDumpingHelper
 
-  class PostgresqlPoint < ActiveRecord::Base
+  class CockroachdbPoint < ActiveRecord::Base
     attribute :x, :point
     attribute :y, :point
     attribute :z, :point
@@ -20,7 +20,7 @@ class PostgresqlPointTest < ActiveRecord::PostgreSQLTestCase
 
   def setup
     @connection = ActiveRecord::Base.connection
-    @connection.create_table("postgresql_points") do |t|
+    @connection.create_table("cockroachdb_points") do |t|
       t.point :x
       t.point :y, default: [12.2, 13.3]
       t.point :z, default: "(14.4,15.5)"
@@ -32,37 +32,37 @@ class PostgresqlPointTest < ActiveRecord::PostgreSQLTestCase
   end
 
   teardown do
-    @connection.drop_table "postgresql_points", if_exists: true
+    @connection.drop_table "cockroachdb_points", if_exists: true
   end
 
   def test_column
-    column = PostgresqlPoint.columns_hash["x"]
+    column = CockroachdbPoint.columns_hash["x"]
     assert_equal :point, column.type
     assert_equal "point", column.sql_type
     assert_not column.array?
 
-    type = PostgresqlPoint.type_for_attribute("x")
+    type = CockroachdbPoint.type_for_attribute("x")
     assert_not type.binary?
   end
 
   def test_default
-    assert_equal ActiveRecord::Point.new(12.2, 13.3), PostgresqlPoint.column_defaults["y"]
-    assert_equal ActiveRecord::Point.new(12.2, 13.3), PostgresqlPoint.new.y
+    assert_equal ActiveRecord::Point.new(12.2, 13.3), CockroachdbPoint.column_defaults["y"]
+    assert_equal ActiveRecord::Point.new(12.2, 13.3), CockroachdbPoint.new.y
 
-    assert_equal ActiveRecord::Point.new(14.4, 15.5), PostgresqlPoint.column_defaults["z"]
-    assert_equal ActiveRecord::Point.new(14.4, 15.5), PostgresqlPoint.new.z
+    assert_equal ActiveRecord::Point.new(14.4, 15.5), CockroachdbPoint.column_defaults["z"]
+    assert_equal ActiveRecord::Point.new(14.4, 15.5), CockroachdbPoint.new.z
   end
 
   def test_schema_dumping
-    output = dump_table_schema("postgresql_points")
+    output = dump_table_schema("cockroachdb_points")
     assert_match %r{t\.point\s+"x"$}, output
     assert_match %r{t\.point\s+"y",\s+default: \[12\.2, 13\.3\]$}, output
     assert_match %r{t\.point\s+"z",\s+default: \[14\.4, 15\.5\]$}, output
   end
 
   def test_roundtrip
-    PostgresqlPoint.create! x: [10, 25.2]
-    record = PostgresqlPoint.first
+    CockroachdbPoint.create! x: [10, 25.2]
+    record = CockroachdbPoint.first
     assert_equal ActiveRecord::Point.new(10, 25.2), record.x
 
     record.x = ActiveRecord::Point.new(1.1, 2.2)
@@ -72,7 +72,7 @@ class PostgresqlPointTest < ActiveRecord::PostgreSQLTestCase
   end
 
   def test_mutation
-    p = PostgresqlPoint.create! x: ActiveRecord::Point.new(10, 20)
+    p = CockroachdbPoint.create! x: ActiveRecord::Point.new(10, 20)
 
     p.x.y = 25
     p.save!
@@ -83,19 +83,19 @@ class PostgresqlPointTest < ActiveRecord::PostgreSQLTestCase
   end
 
   def test_array_assignment
-    p = PostgresqlPoint.new(x: [1, 2])
+    p = CockroachdbPoint.new(x: [1, 2])
 
     assert_equal ActiveRecord::Point.new(1, 2), p.x
   end
 
   def test_string_assignment
-    p = PostgresqlPoint.new(x: "(1, 2)")
+    p = CockroachdbPoint.new(x: "(1, 2)")
 
     assert_equal ActiveRecord::Point.new(1, 2), p.x
   end
 
   def test_empty_string_assignment
-    p = PostgresqlPoint.new(x: "")
+    p = CockroachdbPoint.new(x: "")
     assert_nil p.x
   end
 
@@ -105,7 +105,7 @@ class PostgresqlPointTest < ActiveRecord::PostgreSQLTestCase
       ActiveRecord::Point.new(2, 3),
       ActiveRecord::Point.new(3, 4),
     ]
-    p = PostgresqlPoint.new(array_of_points: expected_value)
+    p = CockroachdbPoint.new(array_of_points: expected_value)
 
     assert_equal expected_value, p.array_of_points
     p.save!
@@ -114,33 +114,33 @@ class PostgresqlPointTest < ActiveRecord::PostgreSQLTestCase
   end
 
   def test_legacy_column
-    column = PostgresqlPoint.columns_hash["legacy_x"]
+    column = CockroachdbPoint.columns_hash["legacy_x"]
     assert_equal :point, column.type
     assert_equal "point", column.sql_type
     assert_not column.array?
 
-    type = PostgresqlPoint.type_for_attribute("legacy_x")
+    type = CockroachdbPoint.type_for_attribute("legacy_x")
     assert_not type.binary?
   end
 
   def test_legacy_default
-    assert_equal [12.2, 13.3], PostgresqlPoint.column_defaults["legacy_y"]
-    assert_equal [12.2, 13.3], PostgresqlPoint.new.legacy_y
+    assert_equal [12.2, 13.3], CockroachdbPoint.column_defaults["legacy_y"]
+    assert_equal [12.2, 13.3], CockroachdbPoint.new.legacy_y
 
-    assert_equal [14.4, 15.5], PostgresqlPoint.column_defaults["legacy_z"]
-    assert_equal [14.4, 15.5], PostgresqlPoint.new.legacy_z
+    assert_equal [14.4, 15.5], CockroachdbPoint.column_defaults["legacy_z"]
+    assert_equal [14.4, 15.5], CockroachdbPoint.new.legacy_z
   end
 
   def test_legacy_schema_dumping
-    output = dump_table_schema("postgresql_points")
+    output = dump_table_schema("cockroachdb_points")
     assert_match %r{t\.point\s+"legacy_x"$}, output
     assert_match %r{t\.point\s+"legacy_y",\s+default: \[12\.2, 13\.3\]$}, output
     assert_match %r{t\.point\s+"legacy_z",\s+default: \[14\.4, 15\.5\]$}, output
   end
 
   def test_legacy_roundtrip
-    PostgresqlPoint.create! legacy_x: [10, 25.2]
-    record = PostgresqlPoint.first
+    CockroachdbPoint.create! legacy_x: [10, 25.2]
+    record = CockroachdbPoint.first
     assert_equal [10, 25.2], record.legacy_x
 
     record.legacy_x = [1.1, 2.2]
@@ -150,7 +150,7 @@ class PostgresqlPointTest < ActiveRecord::PostgreSQLTestCase
   end
 
   def test_legacy_mutation
-    p = PostgresqlPoint.create! legacy_x: [10, 20]
+    p = CockroachdbPoint.create! legacy_x: [10, 20]
 
     p.legacy_x[1] = 25
     p.save!
@@ -161,14 +161,14 @@ class PostgresqlPointTest < ActiveRecord::PostgreSQLTestCase
   end
 end
 
-class PostgresqlGeometricTest < ActiveRecord::PostgreSQLTestCase
+class CockroachdbGeometricTest < ActiveRecord::CockroachDBTestCase
   include SchemaDumpingHelper
 
-  class PostgresqlGeometric < ActiveRecord::Base; end
+  class CockroachdbGeometric < ActiveRecord::Base; end
 
   setup do
     @connection = ActiveRecord::Base.connection
-    @connection.create_table("postgresql_geometrics") do |t|
+    @connection.create_table("cockroachdb_geometrics") do |t|
       t.lseg    :a_line_segment
       t.box     :a_box
       t.path    :a_path
@@ -178,11 +178,11 @@ class PostgresqlGeometricTest < ActiveRecord::PostgreSQLTestCase
   end
 
   teardown do
-    @connection.drop_table "postgresql_geometrics", if_exists: true
+    @connection.drop_table "cockroachdb_geometrics", if_exists: true
   end
 
   def test_geometric_types
-    g = PostgresqlGeometric.new(
+    g = CockroachdbGeometric.new(
       a_line_segment: "(2.0, 3), (5.5, 7.0)",
       a_box: "2.0, 3, 5.5, 7.0",
       a_path: "[(2.0, 3), (5.5, 7.0), (8.5, 11.0)]",
@@ -192,7 +192,7 @@ class PostgresqlGeometricTest < ActiveRecord::PostgreSQLTestCase
 
     g.save!
 
-    h = PostgresqlGeometric.find(g.id)
+    h = CockroachdbGeometric.find(g.id)
 
     assert_equal "[(2,3),(5.5,7)]", h.a_line_segment
     assert_equal "(5.5,7),(2,3)", h.a_box # reordered to store upper right corner then bottom left corner
@@ -202,7 +202,7 @@ class PostgresqlGeometricTest < ActiveRecord::PostgreSQLTestCase
   end
 
   def test_alternative_format
-    g = PostgresqlGeometric.new(
+    g = CockroachdbGeometric.new(
       a_line_segment: "((2.0, 3), (5.5, 7.0))",
       a_box: "(2.0, 3), (5.5, 7.0)",
       a_path: "((2.0, 3), (5.5, 7.0), (8.5, 11.0))",
@@ -212,7 +212,7 @@ class PostgresqlGeometricTest < ActiveRecord::PostgreSQLTestCase
 
     g.save!
 
-    h = PostgresqlGeometric.find(g.id)
+    h = CockroachdbGeometric.find(g.id)
     assert_equal "[(2,3),(5.5,7)]", h.a_line_segment
     assert_equal "(5.5,7),(2,3)", h.a_box   # reordered to store upper right corner then bottom left corner
     assert_equal "((2,3),(5.5,7),(8.5,11))", h.a_path
@@ -221,18 +221,18 @@ class PostgresqlGeometricTest < ActiveRecord::PostgreSQLTestCase
   end
 
   def test_geometric_function
-    PostgresqlGeometric.create! a_path: "[(2.0, 3), (5.5, 7.0), (8.5, 11.0)]"  # [ ] is an open path
-    PostgresqlGeometric.create! a_path: "((2.0, 3), (5.5, 7.0), (8.5, 11.0))"  # ( ) is a closed path
+    CockroachdbGeometric.create! a_path: "[(2.0, 3), (5.5, 7.0), (8.5, 11.0)]"  # [ ] is an open path
+    CockroachdbGeometric.create! a_path: "((2.0, 3), (5.5, 7.0), (8.5, 11.0))"  # ( ) is a closed path
 
-    objs = PostgresqlGeometric.find_by_sql "SELECT isopen(a_path) FROM postgresql_geometrics ORDER BY id ASC"
+    objs = CockroachdbGeometric.find_by_sql "SELECT isopen(a_path) FROM cockroachdb_geometrics ORDER BY id ASC"
     assert_equal [true, false], objs.map(&:isopen)
 
-    objs = PostgresqlGeometric.find_by_sql "SELECT isclosed(a_path) FROM postgresql_geometrics ORDER BY id ASC"
+    objs = CockroachdbGeometric.find_by_sql "SELECT isclosed(a_path) FROM cockroachdb_geometrics ORDER BY id ASC"
     assert_equal [false, true], objs.map(&:isclosed)
   end
 
   def test_schema_dumping
-    output = dump_table_schema("postgresql_geometrics")
+    output = dump_table_schema("cockroachdb_geometrics")
     assert_match %r{t\.lseg\s+"a_line_segment"$}, output
     assert_match %r{t\.box\s+"a_box"$}, output
     assert_match %r{t\.path\s+"a_path"$}, output
@@ -241,54 +241,54 @@ class PostgresqlGeometricTest < ActiveRecord::PostgreSQLTestCase
   end
 end
 
-class PostgreSQLGeometricLineTest < ActiveRecord::PostgreSQLTestCase
+class CockroachDBGeometricLineTest < ActiveRecord::CockroachDBTestCase
   include SchemaDumpingHelper
 
-  class PostgresqlLine < ActiveRecord::Base; end
+  class CockroachdbLine < ActiveRecord::Base; end
 
   setup do
-    unless ActiveRecord::Base.connection.send(:postgresql_version) >= 90400
+    unless ActiveRecord::Base.connection.send(:cockroachdb_version) >= 90400
       skip("line type is not fully implemented")
     end
     @connection = ActiveRecord::Base.connection
-    @connection.create_table("postgresql_lines") do |t|
+    @connection.create_table("cockroachdb_lines") do |t|
       t.line :a_line
     end
   end
 
   teardown do
     if defined?(@connection)
-      @connection.drop_table "postgresql_lines", if_exists: true
+      @connection.drop_table "cockroachdb_lines", if_exists: true
     end
   end
 
   def test_geometric_line_type
-    g = PostgresqlLine.new(
+    g = CockroachdbLine.new(
       a_line: "{2.0, 3, 5.5}"
     )
     g.save!
 
-    h = PostgresqlLine.find(g.id)
+    h = CockroachdbLine.find(g.id)
     assert_equal "{2,3,5.5}", h.a_line
   end
 
   def test_alternative_format_line_type
-    g = PostgresqlLine.new(
+    g = CockroachdbLine.new(
       a_line: "(2.0, 3), (4.0, 6.0)"
     )
     g.save!
 
-    h = PostgresqlLine.find(g.id)
+    h = CockroachdbLine.find(g.id)
     assert_equal "{1.5,-1,0}", h.a_line
   end
 
   def test_schema_dumping_for_line_type
-    output = dump_table_schema("postgresql_lines")
+    output = dump_table_schema("cockroachdb_lines")
     assert_match %r{t\.line\s+"a_line"$}, output
   end
 end
 
-class PostgreSQLGeometricTypesTest < ActiveRecord::PostgreSQLTestCase
+class CockroachDBGeometricTypesTest < ActiveRecord::CockroachDBTestCase
   attr_reader :connection, :table_name
 
   def setup

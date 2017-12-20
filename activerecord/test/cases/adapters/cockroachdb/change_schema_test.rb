@@ -4,7 +4,7 @@ require "cases/helper"
 
 module ActiveRecord
   class Migration
-    class PGChangeSchemaTest < ActiveRecord::PostgreSQLTestCase
+    class PGChangeSchemaTest < ActiveRecord::CockroachDBTestCase
       attr_reader :connection
 
       def setup

@@ -143,7 +143,7 @@ module ActiveRecord
         end
       end
 
-      if current_adapter?(:PostgreSQLAdapter)
+      if current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter)
         def test_create_join_table_with_uuid
           connection.create_join_table :artists, :musics, column_options: { type: :uuid }
           assert_equal [:uuid, :uuid], connection.columns(:artists_musics).map(&:type)

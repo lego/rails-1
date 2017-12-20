@@ -3,7 +3,7 @@
 require "cases/helper"
 require "cases/json_shared_test_cases"
 
-module PostgresqlJSONSharedTestCases
+module CockroachdbJSONSharedTestCases
   include JSONSharedTestCases
 
   def setup
@@ -14,7 +14,7 @@ module PostgresqlJSONSharedTestCases
       t.public_send column_type, "objects", array: true # t.json 'objects', array: true
     end
   rescue ActiveRecord::StatementInvalid
-    skip "do not test on PostgreSQL without #{column_type} type."
+    skip "do not test on CockroachDB without #{column_type} type."
   end
 
   def test_default
@@ -35,16 +35,16 @@ module PostgresqlJSONSharedTestCases
   end
 end
 
-class PostgresqlJSONTest < ActiveRecord::PostgreSQLTestCase
-  include PostgresqlJSONSharedTestCases
+class CockroachdbJSONTest < ActiveRecord::CockroachDBTestCase
+  include CockroachdbJSONSharedTestCases
 
   def column_type
     :json
   end
 end
 
-class PostgresqlJSONBTest < ActiveRecord::PostgreSQLTestCase
-  include PostgresqlJSONSharedTestCases
+class CockroachdbJSONBTest < ActiveRecord::CockroachDBTestCase
+  include CockroachdbJSONSharedTestCases
 
   def column_type
     :jsonb

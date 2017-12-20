@@ -165,7 +165,7 @@ module ActiveRecord
       assert_equal "the overloaded default", model.reload.string_with_default
     end
 
-    if current_adapter?(:PostgreSQLAdapter)
+    if current_adapter?(:PostgreSQLAdapter) || current_adapter?(:CockroachDBAdapter)
       test "array types can be specified" do
         klass = Class.new(OverloadedType) do
           attribute :my_array, :string, limit: 50, array: true

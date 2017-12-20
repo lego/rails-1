@@ -3,7 +3,7 @@
 require "cases/helper"
 require "support/connection_helper"
 
-class PostgreSQLReferentialIntegrityTest < ActiveRecord::PostgreSQLTestCase
+class CockroachDBReferentialIntegrityTest < ActiveRecord::CockroachDBTestCase
   self.use_transactional_tests = false
 
   include ConnectionHelper

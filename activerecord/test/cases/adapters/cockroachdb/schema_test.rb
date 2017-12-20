@@ -15,7 +15,7 @@ module PGSchemaHelper
   end
 end
 
-class SchemaTest < ActiveRecord::PostgreSQLTestCase
+class SchemaTest < ActiveRecord::CockroachDBTestCase
   include PGSchemaHelper
   self.use_transactional_tests = false
 
@@ -370,7 +370,7 @@ class SchemaTest < ActiveRecord::PostgreSQLTestCase
   end
 
   def test_pk_and_sequence_for_with_schema_specified
-    pg_name = ActiveRecord::ConnectionAdapters::PostgreSQL::Name
+    pg_name = ActiveRecord::ConnectionAdapters::CockroachDB::Name
     [
       %("#{SCHEMA_NAME}"."#{PK_TABLE_NAME}"),
       %("#{SCHEMA_NAME}"."#{UNMATCHED_PK_TABLE_NAME}")
@@ -475,7 +475,7 @@ class SchemaTest < ActiveRecord::PostgreSQLTestCase
     end
 end
 
-class SchemaForeignKeyTest < ActiveRecord::PostgreSQLTestCase
+class SchemaForeignKeyTest < ActiveRecord::CockroachDBTestCase
   include SchemaDumpingHelper
 
   setup do
@@ -586,7 +586,7 @@ class DefaultsUsingMultipleSchemasAndDomainTest < ActiveRecord::PostgreSQLTestCa
   end
 end
 
-class SchemaWithDotsTest < ActiveRecord::PostgreSQLTestCase
+class SchemaWithDotsTest < ActiveRecord::CockroachDBTestCase
   include PGSchemaHelper
   self.use_transactional_tests = false
 

@@ -4,7 +4,7 @@ require "cases/helper"
 require "models/author"
 require "models/post"
 
-class PostgreSQLExplainTest < ActiveRecord::PostgreSQLTestCase
+class CockroachDBExplainTest < ActiveRecord::CockroachDBTestCase
   fixtures :authors
 
   def test_explain_for_one_query

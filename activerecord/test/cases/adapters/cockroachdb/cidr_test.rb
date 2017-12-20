@@ -5,8 +5,8 @@ require "ipaddr"
 
 module ActiveRecord
   module ConnectionAdapters
-    class PostgreSQLAdapter < AbstractAdapter
-      class CidrTest < ActiveRecord::PostgreSQLTestCase
+    class CockroachDBAdapter < AbstractAdapter
+      class CidrTest < ActiveRecord::CockroachDBTestCase
         test "type casting IPAddr for database" do
           type = OID::Cidr.new
           ip = IPAddr.new("255.0.0.0/8")

@@ -68,7 +68,7 @@ class FixturesTest < ActiveRecord::TestCase
     end
   end
 
-  if current_adapter?(:Mysql2Adapter, :PostgreSQLAdapter)
+  if current_adapter?(:Mysql2Adapter, :PostgreSQLAdapter, :CockroachDBAdapter)
     def test_bulk_insert
       begin
         subscriber = InsertQuerySubscriber.new
@@ -848,7 +848,7 @@ class FoxyFixturesTest < ActiveRecord::TestCase
   fixtures :parrots, :parrots_pirates, :pirates, :treasures, :mateys, :ships, :computers,
            :developers, :"admin/accounts", :"admin/users", :live_parrots, :dead_parrots, :books
 
-  if ActiveRecord::Base.connection.adapter_name == "PostgreSQL"
+  if ActiveRecord::Base.connection.adapter_name == "PostgreSQL" || ActiveRecord::Base.connection.adapter_name == "CockroachDB"
     require "models/uuid_parent"
     require "models/uuid_child"
     fixtures :uuid_parents, :uuid_children

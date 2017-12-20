@@ -6,9 +6,10 @@ require "active_record/tasks/database_tasks"
 module ActiveRecord
   module DatabaseTasksSetupper
     def setup
-      @mysql_tasks, @postgresql_tasks, @sqlite_tasks = stub, stub, stub
+      @mysql_tasks, @postgresql_tasks, @cockroachdb_tasks, @sqlite_tasks = stub, stub, stub, stub
       ActiveRecord::Tasks::MySQLDatabaseTasks.stubs(:new).returns @mysql_tasks
       ActiveRecord::Tasks::PostgreSQLDatabaseTasks.stubs(:new).returns @postgresql_tasks
+      ActiveRecord::Tasks::CockroachDBDatabaseTasks.stubs(:new).returns @cockroachdb_tasks
       ActiveRecord::Tasks::SQLiteDatabaseTasks.stubs(:new).returns @sqlite_tasks
 
       $stdout, @original_stdout = StringIO.new, $stdout
@@ -23,6 +24,7 @@ module ActiveRecord
   ADAPTERS_TASKS = {
     mysql2:     :mysql_tasks,
     postgresql: :postgresql_tasks,
+    cockroachdb: :cockroachdb_tasks,
     sqlite3:    :sqlite_tasks
   }
 

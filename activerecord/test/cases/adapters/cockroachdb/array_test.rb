@@ -3,7 +3,7 @@
 require "cases/helper"
 require "support/schema_dumping_helper"
 
-class PostgresqlArrayTest < ActiveRecord::PostgreSQLTestCase
+class CockroachdbArrayTest < ActiveRecord::CockroachDBTestCase
   include SchemaDumpingHelper
   include InTimeZone
 
@@ -260,7 +260,7 @@ class PostgresqlArrayTest < ActiveRecord::PostgreSQLTestCase
 
   def test_quoting_non_standard_delimiters
     strings = ["hello,", "world;"]
-    oid = ActiveRecord::ConnectionAdapters::PostgreSQL::OID
+    oid = ActiveRecord::ConnectionAdapters::CockroachDB::OID
     comma_delim = oid::Array.new(ActiveRecord::Type::String.new, ",")
     semicolon_delim = oid::Array.new(ActiveRecord::Type::String.new, ";")
     conn = PgArray.connection

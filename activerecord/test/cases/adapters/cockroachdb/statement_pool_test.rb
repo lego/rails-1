@@ -4,7 +4,7 @@ require "cases/helper"
 
 module ActiveRecord
   module ConnectionAdapters
-    class PostgreSQLAdapter < AbstractAdapter
+    class CockroachDBAdapter < AbstractAdapter
       class InactivePgConnection
         def query(*args)
           raise PG::Error
@@ -15,7 +15,7 @@ module ActiveRecord
         end
       end
 
-      class StatementPoolTest < ActiveRecord::PostgreSQLTestCase
+      class StatementPoolTest < ActiveRecord::CockroachDBTestCase
         if Process.respond_to?(:fork)
           def test_cache_is_per_pid
             cache = StatementPool.new nil, 10

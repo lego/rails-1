@@ -16,7 +16,7 @@ require MIGRATIONS_ROOT + "/rename/2_rename_things"
 require MIGRATIONS_ROOT + "/decimal/1_give_me_big_numbers"
 
 class BigNumber < ActiveRecord::Base
-  unless current_adapter?(:PostgreSQLAdapter, :SQLite3Adapter)
+  unless current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter, :SQLite3Adapter)
     attribute :value_of_e, :integer
   end
   attribute :my_house_population, :integer
@@ -192,7 +192,7 @@ class MigrationTest < ActiveRecord::TestCase
     # This one is fun. The 'value_of_e' field is defined as 'DECIMAL' with
     # precision/scale explicitly left out.  By the SQL standard, numbers
     # assigned to this field should be truncated but that's seldom respected.
-    if current_adapter?(:PostgreSQLAdapter)
+    if current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter)
       # - PostgreSQL changes the SQL spec on columns declared simply as
       # "decimal" to something more useful: instead of being given a scale
       # of 0, they take on the compile-time limit for precision and scale,
@@ -580,7 +580,7 @@ class MigrationTest < ActiveRecord::TestCase
     end
   end
 
-  if current_adapter?(:Mysql2Adapter, :PostgreSQLAdapter)
+  if current_adapter?(:Mysql2Adapter, :PostgreSQLAdapter, :CockroachDBAdapter)
     def test_out_of_range_integer_limit_should_raise
       e = assert_raise(ActiveRecord::ActiveRecordError, "integer limit didn't raise") do
         Person.connection.create_table :test_integer_limits, force: true do |t|

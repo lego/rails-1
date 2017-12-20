@@ -4,8 +4,8 @@ require "cases/helper"
 
 module ActiveRecord
   module ConnectionAdapters
-    class PostgreSQLAdapter
-      class QuotingTest < ActiveRecord::PostgreSQLTestCase
+    class CockroachDBAdapter
+      class QuotingTest < ActiveRecord::CockroachDBTestCase
         def setup
           @conn = ActiveRecord::Base.connection
         end

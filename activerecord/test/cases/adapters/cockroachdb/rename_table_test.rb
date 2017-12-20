@@ -2,7 +2,7 @@
 
 require "cases/helper"
 
-class PostgresqlRenameTableTest < ActiveRecord::PostgreSQLTestCase
+class CockroachdbbbRenameTableTest < ActiveRecord::CockroachDBTestCase
   def setup
     @connection = ActiveRecord::Base.connection
     @connection.create_table :before_rename, force: true

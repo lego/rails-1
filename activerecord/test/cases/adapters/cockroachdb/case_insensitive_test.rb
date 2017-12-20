@@ -2,7 +2,7 @@
 
 require "cases/helper"
 
-class PostgresqlCaseInsensitiveTest < ActiveRecord::PostgreSQLTestCase
+class CockroachdbCaseInsensitiveTest < ActiveRecord::CockroachDBTestCase
   class Default < ActiveRecord::Base; end
 
   def test_case_insensitiveness

@@ -185,7 +185,7 @@ module ActiveRecord
         connection.remove_index("testings", name: "named_admin")
 
         # Selected adapters support index sort order
-        if current_adapter?(:SQLite3Adapter, :Mysql2Adapter, :PostgreSQLAdapter)
+        if current_adapter?(:SQLite3Adapter, :Mysql2Adapter, :PostgreSQLAdapter, :CockroachDBAdapter)
           connection.add_index("testings", ["last_name"], order: { last_name: :desc })
           connection.remove_index("testings", ["last_name"])
           connection.add_index("testings", ["last_name", "first_name"], order: { last_name: :desc })
@@ -197,7 +197,8 @@ module ActiveRecord
         end
       end
 
-      if current_adapter?(:PostgreSQLAdapter)
+      # TODO(joey): make this based on the adapter supporting partial indexes?
+      if current_adapter?(:PostgreSQLAdapter, :CockroachDBAdapter)
         def test_add_partial_index
           connection.add_index("testings", "last_name", where: "first_name = 'john doe'")
           assert connection.index_exists?("testings", "last_name")

@@ -14,7 +14,7 @@ class DefaultTest < ActiveRecord::TestCase
     end
   end
 
-  if current_adapter?(:PostgreSQLAdapter)
+  if current_adapter?(:PostgreSQLAdapter) || current_adapter?(:CockroachDBAdapter)
     def test_multiline_default_text
       record = Default.new
       # older postgres versions represent the default with escapes ("\\012" for a newline)
@@ -83,7 +83,7 @@ class DefaultStringsTest < ActiveRecord::TestCase
   end
 end
 
-if current_adapter?(:PostgreSQLAdapter)
+if current_adapter?(:PostgreSQLAdapter) || current_adapter?(:CockroachDBAdapter)
   class PostgresqlDefaultExpressionTest < ActiveRecord::TestCase
     include SchemaDumpingHelper
 

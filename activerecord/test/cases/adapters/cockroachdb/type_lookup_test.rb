@@ -2,7 +2,7 @@
 
 require "cases/helper"
 
-class PostgresqlTypeLookupTest < ActiveRecord::PostgreSQLTestCase
+class CockroachdbTypeLookupTest < ActiveRecord::CockroachDBTestCase
   setup do
     @connection = ActiveRecord::Base.connection
   end

@@ -3,7 +3,7 @@
 require "cases/helper"
 require "support/schema_dumping_helper"
 
-class PostgresqlHstoreTest < ActiveRecord::PostgreSQLTestCase
+class CockroachdbHstoreTest < ActiveRecord::CockroachDBTestCase
   include SchemaDumpingHelper
   class Hstore < ActiveRecord::Base
     self.table_name = "hstores"

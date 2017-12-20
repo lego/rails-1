@@ -23,10 +23,10 @@ class TypeTest < ActiveRecord::TestCase
     type = Struct.new(:args)
     pgtype = Struct.new(:args)
     ActiveRecord::Type.register(:foo, type, override: false)
-    ActiveRecord::Type.register(:foo, pgtype, adapter: :postgresql)
+    ActiveRecord::Type.register(:foo, pgtype, adapter: :cockroachdb)
 
     assert_equal type.new, ActiveRecord::Type.lookup(:foo, adapter: :sqlite)
-    assert_equal pgtype.new, ActiveRecord::Type.lookup(:foo, adapter: :postgresql)
+    assert_equal pgtype.new, ActiveRecord::Type.lookup(:foo, adapter: :cockroachdb)
   end
 
   test "lookup defaults to the current adapter" do

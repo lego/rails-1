@@ -286,7 +286,7 @@ module ActiveRecord
       assert_equal "Sekitoba", Horse.new.name
     end
 
-    if current_adapter?(:PostgreSQLAdapter)
+    if current_adapter?(:PostgreSQLAdapter) || current_adapter?(:CockroachDBAdapter)
       def test_migrate_enable_and_disable_extension
         migration1 = InvertibleMigration.new
         migration2 = DisableExtension1.new

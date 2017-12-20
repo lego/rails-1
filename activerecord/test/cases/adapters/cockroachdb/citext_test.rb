@@ -3,7 +3,7 @@
 require "cases/helper"
 require "support/schema_dumping_helper"
 
-class PostgresqlCitextTest < ActiveRecord::PostgreSQLTestCase
+class CockroachdbCitextTest < ActiveRecord::CockroachDBTestCase
   include SchemaDumpingHelper
   class Citext < ActiveRecord::Base
     self.table_name = "citexts"

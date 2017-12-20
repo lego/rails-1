@@ -5,7 +5,7 @@ require "support/connection_helper"
 require "concurrent/atomic/cyclic_barrier"
 
 module ActiveRecord
-  class PostgresqlTransactionTest < ActiveRecord::PostgreSQLTestCase
+  class CockroachdbTransactionTest < ActiveRecord::CockroachDBTestCase
     self.use_transactional_tests = false
 
     class Sample < ActiveRecord::Base
@@ -93,9 +93,9 @@ module ActiveRecord
       end
     end
 
-    test "raises LockWaitTimeout when lock wait timeout exceeded" do
-      skip unless ActiveRecord::Base.connection.postgresql_version >= 90300
-      assert_raises(ActiveRecord::LockWaitTimeout) do
+    test "raises TransactionTimeout when lock wait timeout exceeded" do
+      skip unless ActiveRecord::Base.connection.cockroachdb_version >= 90300
+      assert_raises(ActiveRecord::TransactionTimeout) do
         s = Sample.create!(value: 1)
         latch1 = Concurrent::CountDownLatch.new
         latch2 = Concurrent::CountDownLatch.new
@@ -122,8 +122,8 @@ module ActiveRecord
       end
     end
 
-    test "raises QueryCanceled when statement timeout exceeded" do
-      assert_raises(ActiveRecord::QueryCanceled) do
+    test "raises StatementTimeout when statement timeout exceeded" do
+      assert_raises(ActiveRecord::StatementTimeout) do
         s = Sample.create!(value: 1)
         latch1 = Concurrent::CountDownLatch.new
         latch2 = Concurrent::CountDownLatch.new

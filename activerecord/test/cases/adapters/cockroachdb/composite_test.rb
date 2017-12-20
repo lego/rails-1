@@ -3,11 +3,11 @@
 require "cases/helper"
 require "support/connection_helper"
 
-module PostgresqlCompositeBehavior
+module CockroachdbCompositeBehavior
   include ConnectionHelper
 
-  class PostgresqlComposite < ActiveRecord::Base
-    self.table_name = "postgresql_composites"
+  class CockroachdbComposite < ActiveRecord::Base
+    self.table_name = "cockroachdb_composites"
   end
 
   def setup
@@ -22,7 +22,7 @@ module PostgresqlCompositeBehavior
              street VARCHAR(90)
          );
         SQL
-      @connection.create_table("postgresql_composites") do |t|
+      @connection.create_table("cockroachdb_composites") do |t|
         t.column :address, :full_address
       end
     end
@@ -31,37 +31,37 @@ module PostgresqlCompositeBehavior
   def teardown
     super
 
-    @connection.drop_table "postgresql_composites", if_exists: true
+    @connection.drop_table "cockroachdb_composites", if_exists: true
     @connection.execute "DROP TYPE IF EXISTS full_address"
     reset_connection
-    PostgresqlComposite.reset_column_information
+    CockroachdbComposite.reset_column_information
   end
 end
 
 # Composites are mapped to `OID::Identity` by default. The user is informed by a warning like:
 #   "unknown OID 5653508: failed to recognize type of 'address'. It will be treated as String."
 # To take full advantage of composite types, we suggest you register your own +OID::Type+.
-# See PostgresqlCompositeWithCustomOIDTest
-class PostgresqlCompositeTest < ActiveRecord::PostgreSQLTestCase
-  include PostgresqlCompositeBehavior
+# See CockroachdbCompositeWithCustomOIDTest
+class CockroachdbCompositeTest < ActiveRecord::CockroachDBTestCase
+  include CockroachdbCompositeBehavior
 
   def test_column
     ensure_warning_is_issued
 
-    column = PostgresqlComposite.columns_hash["address"]
+    column = CockroachdbComposite.columns_hash["address"]
     assert_nil column.type
     assert_equal "full_address", column.sql_type
     assert_not column.array?
 
-    type = PostgresqlComposite.type_for_attribute("address")
+    type = CockroachdbComposite.type_for_attribute("address")
     assert_not type.binary?
   end
 
   def test_composite_mapping
     ensure_warning_is_issued
 
-    @connection.execute "INSERT INTO postgresql_composites VALUES (1, ROW('Paris', 'Champs-Élysées'));"
-    composite = PostgresqlComposite.first
+    @connection.execute "INSERT INTO cockroachdb_composites VALUES (1, ROW('Paris', 'Champs-Élysées'));"
+    composite = CockroachdbComposite.first
     assert_equal "(Paris,Champs-Élysées)", composite.address
 
     composite.address = "(Paris,Rue Basse)"
@@ -73,14 +73,14 @@ class PostgresqlCompositeTest < ActiveRecord::PostgreSQLTestCase
   private
     def ensure_warning_is_issued
       warning = capture(:stderr) do
-        PostgresqlComposite.columns_hash
+        CockroachdbComposite.columns_hash
       end
       assert_match(/unknown OID \d+: failed to recognize type of 'address'\. It will be treated as String\./, warning)
     end
 end
 
-class PostgresqlCompositeWithCustomOIDTest < ActiveRecord::PostgreSQLTestCase
-  include PostgresqlCompositeBehavior
+class CockroachdbCompositeWithCustomOIDTest < ActiveRecord::CockroachDBTestCase
+  include CockroachdbCompositeBehavior
 
   class FullAddressType < ActiveRecord::Type::Value
     def type; :full_address end
@@ -110,18 +110,18 @@ class PostgresqlCompositeWithCustomOIDTest < ActiveRecord::PostgreSQLTestCase
   end
 
   def test_column
-    column = PostgresqlComposite.columns_hash["address"]
+    column = CockroachdbComposite.columns_hash["address"]
     assert_equal :full_address, column.type
     assert_equal "full_address", column.sql_type
     assert_not column.array?
 
-    type = PostgresqlComposite.type_for_attribute("address")
+    type = CockroachdbComposite.type_for_attribute("address")
     assert_not type.binary?
   end
 
   def test_composite_mapping
-    @connection.execute "INSERT INTO postgresql_composites VALUES (1, ROW('Paris', 'Champs-Élysées'));"
-    composite = PostgresqlComposite.first
+    @connection.execute "INSERT INTO cockroachdb_composites VALUES (1, ROW('Paris', 'Champs-Élysées'));"
+    composite = CockroachdbComposite.first
     assert_equal "Paris", composite.address.city
     assert_equal "Champs-Élysées", composite.address.street
 

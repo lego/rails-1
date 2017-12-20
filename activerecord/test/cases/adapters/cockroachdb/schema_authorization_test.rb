@@ -5,7 +5,7 @@ require "cases/helper"
 class SchemaThing < ActiveRecord::Base
 end
 
-class SchemaAuthorizationTest < ActiveRecord::PostgreSQLTestCase
+class SchemaAuthorizationTest < ActiveRecord::CockroachDBTestCase
   self.use_transactional_tests = false
 
   TABLE_NAME = "schema_things"

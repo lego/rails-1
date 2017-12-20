@@ -528,7 +528,7 @@ class CalculationsTest < ActiveRecord::TestCase
   end
 
   def test_should_sum_expression
-    if current_adapter?(:SQLite3Adapter, :Mysql2Adapter, :PostgreSQLAdapter, :OracleAdapter)
+    if current_adapter?(:SQLite3Adapter, :Mysql2Adapter, :PostgreSQLAdapter, :CockroachDBAdapter, :OracleAdapter)
       assert_equal 636, Account.sum("2 * credit_limit")
     else
       assert_equal 636, Account.sum("2 * credit_limit").to_i
